@@ -67,15 +67,14 @@ def get_n_similar_users(user_id, n):
     corrs.sort(key=lambda x: x[1], reverse=True)
     return corrs[:n]
 
-# TODO predict rating from active user for given movie
+# TODO antti predict rating from active user for given movie
 def predict(user_id, movie_id, n):
 
     user_ratings = user_movie_matrix.loc[user_id]
     similar_users = get_n_similar_users(user_id, n)
 
-    # TODO implement prediction function
 
-# TODO calculate different similarity between users, cosine similarity???
+# TODO sophie calculate different similarity between users, cosine similarity???
 
 
 
@@ -104,7 +103,7 @@ def main():
         print(user)
     
     print(f"\n## Top-{n} most relevant movies for user {user_id} ##")
-
+    # TODO antti print this
 
     # e) design and implement new similarity function
     
