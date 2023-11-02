@@ -93,10 +93,27 @@ def print_similar_users(user_movie_matrix, user_id):
         print(user)
 
 
-# TODO antti predict rating from active user for given movie
-def predict(user_movie_matrix, user_id, movie_id):
-    user_ratings = user_movie_matrix.loc[user_id]
-    similar_users = get_similar_users(user_movie_matrix, user_id)
+# predict rating from active user for given movie
+def predict(user_movie_df: pd.DataFrame, user_id: int, movie_id: int) -> float:
+    a = user_id
+    similar_users = get_similar_users(user_movie_df, user_id)
+    pearson_for_user = dict(similar_users)
+
+    # Mean of the rating for user a
+    a_mean = user_movie_df.loc[a].mean()
+
+    # Top N users who have rated movie and are most similar to user a
+    users = user_movie_df[user_movie_df[movie_id].notnull()].index
+    top_n_users = [user for user, _ in similar_users if user in users][:N]
+
+    numerator = 0
+    denominator = 0
+    for b in top_n_users:
+        b_mean = user_movie_df.loc[b].mean()
+        numerator += pearson_for_user[b] * (user_movie_df.loc[b, movie_id] - b_mean)
+        denominator += pearson_for_user[b]
+
+    return a_mean + numerator / denominator
 
 
 # TODO sophie calculate different similarity between users, cosine similarity???
