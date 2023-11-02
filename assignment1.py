@@ -82,14 +82,14 @@ def get_similar_users(user_movie_matrix, user_id):
             corr = pearson_corr(user_movie_matrix, user_id, other_user)
             corrs.append((other_user, corr))
     corrs.sort(key=lambda x: x[1], reverse=True)
-    return corrs[:N]
+    return corrs
 
 
 # print top-N most similar users to active user
 def print_similar_users(user_movie_matrix, user_id):
     print(f"Top-{N} most similar users to user {user_id}")
     similar_users = get_similar_users(user_movie_matrix, user_id)
-    for user, _ in similar_users:
+    for user, _ in similar_users[:N]:
         print(user)
 
 
