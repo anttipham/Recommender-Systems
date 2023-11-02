@@ -52,26 +52,26 @@ def read_movielens(path):
 # calculate pearson correlation between users
 def pearson_corr(user_movie_matrix, user1, user2):
     # find movies both users have rated
-    all_rated = user_movie_matrix[user_movie_matrix.index.isin([user1, user2])]
-    common_rated = all_rated.dropna(axis=1, how="any")
+    user1_data = user_movie_matrix.loc[user1].dropna().to_frame()
+    user2_data = user_movie_matrix.loc[user2].dropna().to_frame()
+    common = user1_data.index.intersection(user2_data.index)
 
-    if common_rated.shape[1] < 2:
+    if len(common) < 2:
         return 0  # No common movies
 
-    user1_ratings = common_rated.loc[user1]
-    user2_ratings = common_rated.loc[user2]
+    user1_ratings = user1_data.loc[common].values
+    user2_ratings = user2_data.loc[common].values
 
-    user1_mean = user1_ratings.mean()
-    user2_mean = user2_ratings.mean()
+    user1_mean = user1_data.mean().values[0]
+    user2_mean = user2_data.mean().values[0]
 
     numerator = sum((user1_ratings - user1_mean) * (user2_ratings - user2_mean))
-    denominator = np.sqrt(sum((user1_ratings - user1_mean) ** 2)) * np.sqrt(
-        sum((user2_ratings - user2_mean) ** 2)
-    )
+    denominator = np.sqrt(sum((user1_ratings - user1_mean) **2)) \
+                * np.sqrt(sum((user2_ratings - user2_mean) **2))
 
     if denominator == 0:  # handle no variance in one user's ratings
         return 0
-    return numerator / denominator
+    return (numerator / denominator)[0]
 
 
 # calculate pearson correlation for all users against active user
