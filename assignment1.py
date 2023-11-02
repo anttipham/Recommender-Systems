@@ -66,8 +66,9 @@ def pearson_corr(user_movie_matrix, user1, user2):
     user2_mean = user2_data.mean().values[0]
 
     numerator = sum((user1_ratings - user1_mean) * (user2_ratings - user2_mean))
-    denominator = np.sqrt(sum((user1_ratings - user1_mean) **2)) \
-                * np.sqrt(sum((user2_ratings - user2_mean) **2))
+    denominator = np.sqrt(sum((user1_ratings - user1_mean) ** 2)) * np.sqrt(
+        sum((user2_ratings - user2_mean) ** 2)
+    )
 
     if denominator == 0:  # handle no variance in one user's ratings
         return 0
@@ -143,22 +144,17 @@ def main():
     user_movie_matrix = read_movielens(path)
     print()
 
-    # b) and c)
+    # b)
+    print("##")
     print(
-        "## b) c) User-based Collaborative Filtering Approach,"
+        "b) User-based Collaborative Filtering Approach, "
         "pearson correlation between users"
-        "prediction function for movie scores ##"
     )
-    print(
-        "The functions are implemented in the print_similar_users "
-        "and print_top_movies functions"
-    )
-    print()
-
+    # c
+    print("c) prediction function for movie scores")
     # d)
-    print(
-        "## d) select user, show 10 most similar users and 10 most relevant movies ##"
-    )
+    print("d) select user, show 10 most similar users and 10 most relevant movies")
+    print("##")
     print_similar_users(user_movie_matrix, USER_ID)
     print()
     print_top_movies(user_movie_matrix, USER_ID)
