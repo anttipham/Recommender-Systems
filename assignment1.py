@@ -33,7 +33,9 @@ def parse_args():
 # read data
 def read_movielens(path):
     ratings = pd.read_csv(os.path.join(path, "ratings.csv"))
-    print(f"\n## Ratings downloaded, number of ratings: {ratings.shape[0]} ##")
+
+    # Display 10 first rows of the ratings data
+    print(f"Ratings downloaded, number of ratings: {ratings.shape[0]}")
     print(ratings.head(N))
 
     # create new dataframe where
@@ -82,6 +84,13 @@ def get_similar_users(user_movie_matrix, user_id):
     return corrs[:N]
 
 
+def print_similar_users(user_movie_matrix, user_id):
+    print(f"Top-{N} most similar users to user {user_id}")
+    similar_users = get_similar_users(user_movie_matrix, user_id)
+    for user, _ in similar_users:
+        print(user)
+
+
 # TODO antti predict rating from active user for given movie
 def predict(user_movie_matrix, user_id, movie_id):
     user_ratings = user_movie_matrix.loc[user_id]
@@ -94,26 +103,31 @@ def predict(user_movie_matrix, user_id, movie_id):
 def main():
     path = parse_args()
 
-    # a) download and display rating data
+    # a)
+    print("## a) download and display rating data")
     user_movie_matrix = read_movielens(path)
+    print()
 
-    # b) c) user-based collaborative filtering approach,
-    # pearson correlation between users
-    # prediction function for movie scores
-    print("\n## User-based Collaborative Filtering Approach ##")
+    # b) and c)
+    print(
+        "## b) c) User-based Collaborative Filtering Approach,"
+        "pearson correlation between users"
+        "prediction function for movie scores ##"
+    )
     user_id = 1
     movie_id = 1
     predict(user_movie_matrix, user_id, movie_id)
+    print()
 
-    # d) select user, show 10 most similar users and 10 most relevan movies
-    print(f"\n## Top-{N} most similar users to user {user_id} ##")
-    similar_users = get_similar_users(user_movie_matrix, user_id)
-    for user, _ in similar_users:
-        print(user)
+    # d)
+    print("## d) select user, show 10 most similar users and 10 most relevan movies ##")
+    print_similar_users(user_movie_matrix, user_id)
+    print()
 
     print(f"\n## Top-{N} most relevant movies for user {user_id} ##")
     # TODO antti print this
 
+    # e)
     # e) design and implement new similarity function
 
 
