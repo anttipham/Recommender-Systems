@@ -7,6 +7,7 @@ Antti Pham
 """
 
 import argparse
+import os
 
 import pandas as pd
 import numpy as np
@@ -29,7 +30,7 @@ def parse_args():
 
 # read data
 def read_movielens(path):
-    ratings = pd.read_csv(f"{path}ratings.csv")
+    ratings = pd.read_csv(os.path.join(path, "ratings.csv"))
     print(f"\n## Ratings downloaded, number of ratings: {ratings.shape[0]} ##")
     print(ratings.head())
 
@@ -44,7 +45,7 @@ def read_movielens(path):
 
 
 # calculate pearson correlation between users
-def pearson_corr(user1, user2):
+def pearson_corr(user_movie_matrix, user1, user2):
     # find movies both users have rated
     all_rated = user_movie_matrix[user_movie_matrix.index.isin([user1, user2])]
     common_rated = all_rated.dropna(axis=1, how="any")
@@ -69,20 +70,20 @@ def pearson_corr(user1, user2):
 
 
 # calculate pearson correlation for all users against active user
-def get_n_similar_users(user_id, n):
+def get_n_similar_users(user_movie_matrix, user_id, n):
     corrs = []
     for other_user in user_movie_matrix.index:
         if other_user != user_id:
-            corr = pearson_corr(user_id, other_user)
+            corr = pearson_corr(user_movie_matrix, user_id, other_user)
             corrs.append((other_user, corr))
     corrs.sort(key=lambda x: x[1], reverse=True)
     return corrs[:n]
 
 
 # TODO antti predict rating from active user for given movie
-def predict(user_id, movie_id, n):
+def predict(user_movie_matrix, user_id, movie_id, n):
     user_ratings = user_movie_matrix.loc[user_id]
-    similar_users = get_n_similar_users(user_id, n)
+    similar_users = get_n_similar_users(user_movie_matrix, user_id, n)
 
 
 # TODO sophie calculate different similarity between users, cosine similarity???
@@ -92,7 +93,6 @@ def main():
     path = parse_args()
 
     # a) download and display rating data
-    global user_movie_matrix
     user_movie_matrix = read_movielens(path)
 
     # b) c) user-based collaborative filtering approach,
@@ -102,11 +102,11 @@ def main():
     user_id = 1
     movie_id = 1
     n = 10
-    predict(user_id, movie_id, n)
+    predict(user_movie_matrix, user_id, movie_id, n)
 
     # d) select user, show 10 most similar users and 10 most relevan movies
     print(f"\n## Top-{n} most similar users to user {user_id} ##")
-    similar_users = get_n_similar_users(user_id, n=n)
+    similar_users = get_n_similar_users(user_movie_matrix, user_id, n=n)
     for user, _ in similar_users:
         print(user)
 
