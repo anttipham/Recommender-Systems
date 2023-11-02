@@ -93,27 +93,43 @@ def print_similar_users(user_movie_matrix, user_id):
         print(user)
 
 
-# predict rating from active user for given movie
-def predict(user_movie_df: pd.DataFrame, user_id: int, movie_id: int) -> float:
-    a = user_id
-    similar_users = get_similar_users(user_movie_df, user_id)
+# Return the top N movies for user a that user a has not seen before.
+def print_top_movies(user_movie_df: pd.DataFrame, user_id: int) -> None:
+    similar_users = get_similar_users(user_movie_df, user_id)[:N]
     pearson_for_user = dict(similar_users)
-
     # Mean of the rating for user a
+    a = user_id
     a_mean = user_movie_df.loc[a].mean()
 
-    # Top N users who have rated movie and are most similar to user a
-    users = user_movie_df[user_movie_df[movie_id].notnull()].index
-    top_n_users = [user for user, _ in similar_users if user in users][:N]
+    def predict(user_movie_df: pd.DataFrame, movie_id: int) -> float:
+        # Get top N users who have rated the movie and are most similar to user a
+        top_n_users = []
+        for user, _ in similar_users:
+            if pd.isna(user_movie_df.loc[user, movie_id]):
+                continue
+            top_n_users.append(user)
 
-    numerator = 0
-    denominator = 0
-    for b in top_n_users:
-        b_mean = user_movie_df.loc[b].mean()
-        numerator += pearson_for_user[b] * (user_movie_df.loc[b, movie_id] - b_mean)
-        denominator += pearson_for_user[b]
+        numerator = 0
+        denominator = 0
+        for b in top_n_users:
+            b_mean = user_movie_df.loc[b].mean()
+            numerator += pearson_for_user[b] * (user_movie_df.loc[b, movie_id] - b_mean)
+            denominator += pearson_for_user[b]
 
-    return a_mean + numerator / denominator
+        if denominator == 0:
+            return 0
+        return a_mean + numerator / denominator
+
+    # Movies that user a has not rated
+    movies = user_movie_df[user_movie_df[user_id].isnull()].columns.astype(int)
+    # Predict ratings for movies
+    predictions = [(movie, predict(user_movie_df, movie)) for movie in movies]
+    predictions.sort(key=lambda x: x[1], reverse=True)
+
+    # Print top N movies
+    print(f"Top-{N} most relevant movies for user {USER_ID}")
+    for movie, _ in predictions[:N]:
+        print(movie)
 
 
 # TODO sophie calculate different similarity between users, cosine similarity???
@@ -133,17 +149,20 @@ def main():
         "pearson correlation between users"
         "prediction function for movie scores ##"
     )
-    movie_id = 1
-    predict(user_movie_matrix, USER_ID, movie_id)
+    print(
+        "The functions are implemented in the print_similar_users "
+        "and print_top_movies functions"
+    )
     print()
 
     # d)
-    print("## d) select user, show 10 most similar users and 10 most relevan movies ##")
+    print(
+        "## d) select user, show 10 most similar users and 10 most relevant movies ##"
+    )
     print_similar_users(user_movie_matrix, USER_ID)
     print()
-
-    print(f"\n## Top-{N} most relevant movies for user {USER_ID} ##")
-    # TODO antti print this
+    print_top_movies(user_movie_matrix, USER_ID)
+    print()
 
     # e)
     # e) design and implement new similarity function
