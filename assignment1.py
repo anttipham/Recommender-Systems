@@ -24,7 +24,7 @@ def parse_args():
         "--path",
         "-p",
         required=True,
-        help="Path to the ml-latest-small directory, remember / at the end",
+        help="Path to the ml-latest-small directory",
     )
     args = parser.parse_args()
     return args.path
