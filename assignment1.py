@@ -12,6 +12,8 @@ import os
 import pandas as pd
 import numpy as np
 
+N = 10
+
 
 # handle command-line args
 def parse_args():
@@ -32,7 +34,7 @@ def parse_args():
 def read_movielens(path):
     ratings = pd.read_csv(os.path.join(path, "ratings.csv"))
     print(f"\n## Ratings downloaded, number of ratings: {ratings.shape[0]} ##")
-    print(ratings.head())
+    print(ratings.head(N))
 
     # create new dataframe where
     # userIds become the rows aka index
@@ -70,20 +72,20 @@ def pearson_corr(user_movie_matrix, user1, user2):
 
 
 # calculate pearson correlation for all users against active user
-def get_n_similar_users(user_movie_matrix, user_id, n):
+def get_similar_users(user_movie_matrix, user_id):
     corrs = []
     for other_user in user_movie_matrix.index:
         if other_user != user_id:
             corr = pearson_corr(user_movie_matrix, user_id, other_user)
             corrs.append((other_user, corr))
     corrs.sort(key=lambda x: x[1], reverse=True)
-    return corrs[:n]
+    return corrs[:N]
 
 
 # TODO antti predict rating from active user for given movie
-def predict(user_movie_matrix, user_id, movie_id, n):
+def predict(user_movie_matrix, user_id, movie_id):
     user_ratings = user_movie_matrix.loc[user_id]
-    similar_users = get_n_similar_users(user_movie_matrix, user_id, n)
+    similar_users = get_similar_users(user_movie_matrix, user_id)
 
 
 # TODO sophie calculate different similarity between users, cosine similarity???
@@ -101,16 +103,15 @@ def main():
     print("\n## User-based Collaborative Filtering Approach ##")
     user_id = 1
     movie_id = 1
-    n = 10
-    predict(user_movie_matrix, user_id, movie_id, n)
+    predict(user_movie_matrix, user_id, movie_id)
 
     # d) select user, show 10 most similar users and 10 most relevan movies
-    print(f"\n## Top-{n} most similar users to user {user_id} ##")
-    similar_users = get_n_similar_users(user_movie_matrix, user_id, n=n)
+    print(f"\n## Top-{N} most similar users to user {user_id} ##")
+    similar_users = get_similar_users(user_movie_matrix, user_id)
     for user, _ in similar_users:
         print(user)
 
-    print(f"\n## Top-{n} most relevant movies for user {user_id} ##")
+    print(f"\n## Top-{N} most relevant movies for user {user_id} ##")
     # TODO antti print this
 
     # e) design and implement new similarity function
