@@ -13,6 +13,7 @@ import pandas as pd
 import numpy as np
 
 N = 10
+USER_ID = 1
 
 
 # handle command-line args
@@ -84,6 +85,7 @@ def get_similar_users(user_movie_matrix, user_id):
     return corrs[:N]
 
 
+# print top-N most similar users to active user
 def print_similar_users(user_movie_matrix, user_id):
     print(f"Top-{N} most similar users to user {user_id}")
     similar_users = get_similar_users(user_movie_matrix, user_id)
@@ -114,17 +116,16 @@ def main():
         "pearson correlation between users"
         "prediction function for movie scores ##"
     )
-    user_id = 1
     movie_id = 1
-    predict(user_movie_matrix, user_id, movie_id)
+    predict(user_movie_matrix, USER_ID, movie_id)
     print()
 
     # d)
     print("## d) select user, show 10 most similar users and 10 most relevan movies ##")
-    print_similar_users(user_movie_matrix, user_id)
+    print_similar_users(user_movie_matrix, USER_ID)
     print()
 
-    print(f"\n## Top-{N} most relevant movies for user {user_id} ##")
+    print(f"\n## Top-{N} most relevant movies for user {USER_ID} ##")
     # TODO antti print this
 
     # e)
