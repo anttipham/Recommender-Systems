@@ -43,9 +43,7 @@ def read_movielens(path):
     # userIds become the rows aka index
     # movieIds become the columns
     # ratings for each movie are placed in the cells accordingly
-    user_movie_df = ratings.pivot(
-        index="userId", columns="movieId", values="rating"
-    )
+    user_movie_df = ratings.pivot(index="userId", columns="movieId", values="rating")
     return user_movie_df
 
 
@@ -55,8 +53,10 @@ def pearson_corr(user_movie_df, user1, user2):
     user1_data = user_movie_df.loc[user1].dropna().to_frame()
     user2_data = user_movie_df.loc[user2].dropna().to_frame()
     common = user1_data.index.intersection(user2_data.index)
-    
-    if len(common) < 2: # TODO handle this case differently? 1, 2, bigger?, remove if (return NaN)
+
+    if (
+        len(common) < 2
+    ):  # TODO handle this case differently? 1, 2, bigger?, remove if (return NaN)
         return 0  # No common movies
 
     user1_ratings = user1_data.loc[common].values
@@ -71,20 +71,23 @@ def pearson_corr(user_movie_df, user1, user2):
     )
     return (numerator / denominator)[0] if denominator else 0
 
+
 # calculate cosine similarity between users (normal or adjusted)
 def cosine_sim(user_movie_df, user1, user2, adjusted=False):
     # find movies both have rated
     user1_data = user_movie_df.loc[user1].dropna().to_frame()
     user2_data = user_movie_df.loc[user2].dropna().to_frame()
     common = user1_data.index.intersection(user2_data.index)
-    
-    if len(common) < 2: # TODO handle this case differently? 1, 2, bigger?, remove if (return NaN)
+
+    if (
+        len(common) < 2
+    ):  # TODO handle this case differently? 1, 2, bigger?, remove if (return NaN)
         return 0
 
     user1_ratings = user1_data.loc[common].values
     user2_ratings = user2_data.loc[common].values
 
-    if adjusted: # normalize data
+    if adjusted:  # normalize data
         user1_mean = user1_data.mean().values[0]
         user2_mean = user2_data.mean().values[0]
 
@@ -98,13 +101,14 @@ def cosine_sim(user_movie_df, user1, user2, adjusted=False):
 
 # return similarity value between two users depending on chosen metric
 def get_similarity(user_movie_df, user1, user2, similarity_type):
-    if similarity_type == 'cosine':
+    if similarity_type == "cosine":
         sim = cosine_sim(user_movie_df, user1, user2)
-    elif similarity_type == 'adjusted_cosine':
+    elif similarity_type == "adjusted_cosine":
         sim = cosine_sim(user_movie_df, user1, user2, adjusted=True)
     else:
         sim = pearson_corr(user_movie_df, user1, user2)
     return sim
+
 
 # calculate similarity for all users against active user
 def get_similar_users(user_movie_df, user_id, similarity_type):
@@ -114,26 +118,26 @@ def get_similar_users(user_movie_df, user_id, similarity_type):
             sim = get_similarity(user_movie_df, user_id, other_user, similarity_type)
             sims.append((other_user, sim))
     sims.sort(key=lambda x: x[1], reverse=True)
-    return sims # TODO change to return a dict??
+    return sims  # TODO change to return a dict??
 
 
 # print top-N most similar users to active user
-def print_similar_users(user_movie_df, user_id, similarity_type='pearson'):
+def print_similar_users(user_movie_df, user_id, similarity_type="pearson"):
     print(f"Top-{N} most similar users to user {user_id}")
     similar_users = get_similar_users(user_movie_df, user_id, similarity_type)
     for user, _ in similar_users[:N]:
         print(user)
 
 
-# Return the top N movies for user a that user a has not seen before.
-def print_top_movies(user_movie_df: pd.DataFrame, user_id: int, similarity_type='pearson') -> None:
+def get_top_movies(
+    user_movie_df: pd.DataFrame, user_id: int, similarity_type="pearson"
+) -> list[tuple(int, float)]:
     similar_users = get_similar_users(user_movie_df, user_id, similarity_type)[:N]
     pearson_for_user = dict(similar_users)
     # Mean of the rating for user a
     a = user_id
     a_mean = user_movie_df.loc[a].mean()
 
-    # TODO this needs to be moved out of the print function
     def predict(user_movie_df: pd.DataFrame, movie_id: int) -> float:
         # Get top N users who have rated the movie and are most similar to user a
         top_n_users = []
@@ -156,7 +160,14 @@ def print_top_movies(user_movie_df: pd.DataFrame, user_id: int, similarity_type=
     # Predict ratings for movies
     predictions = [(movie, predict(user_movie_df, movie)) for movie in movies]
     predictions.sort(key=lambda x: x[1], reverse=True)
+    return predictions
 
+
+# Return the top N movies for user a that user a has not seen before.
+def print_top_movies(
+    user_movie_df: pd.DataFrame, user_id: int, similarity_type="pearson"
+) -> None:
+    predictions = get_top_movies(user_movie_df, user_id, similarity_type)
     # Print top N movies
     print(f"Top-{N} most relevant movies for user {USER_ID}")
     for movie, _ in predictions[:N]:
@@ -191,9 +202,9 @@ def main():
     # e) design and implement new similarity function, we chose cosine similarity
     print("e) design and implement new similarity function: cosine similarity")
     print("##")
-    print_similar_users(user_movie_df, USER_ID, similarity_type='adjusted_cosine')
+    print_similar_users(user_movie_df, USER_ID, similarity_type="adjusted_cosine")
     print()
-    print_top_movies(user_movie_df, USER_ID, similarity_type='adjusted_cosine')
+    print_top_movies(user_movie_df, USER_ID, similarity_type="adjusted_cosine")
     print()
 
 
