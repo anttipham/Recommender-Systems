@@ -13,7 +13,7 @@ import pandas as pd
 import numpy as np
 
 N = 10
-USER_ID = 1
+USER_ID = 233
 
 
 def parse_args():
@@ -68,7 +68,7 @@ def pearson_corr(user_movie_df, user1, user2):
     common = user1_data.index.intersection(user2_data.index)
 
     # NOTE this means we don't calculate similarity measure when less than 3
-    if (len(common) < 3): 
+    if len(common) < 3:
         return 0
 
     # fetch user specific values for the common movies
@@ -85,7 +85,7 @@ def cosine_sim(user_movie_df, user1, user2, adjusted=False):
     """
     Calculate cosine similarity between users (either normal or adjusted)
     """
-    
+
     # fetch user data from dataframe
     user1_data = user_movie_df.loc[user1].dropna().to_frame()
     user2_data = user_movie_df.loc[user2].dropna().to_frame()
@@ -94,7 +94,7 @@ def cosine_sim(user_movie_df, user1, user2, adjusted=False):
     common = user1_data.index.intersection(user2_data.index)
 
     # NOTE this means we don't calculate similarity measure when less than 3
-    if (len(common) < 3): 
+    if len(common) < 3:
         return 0
 
     # fetch user specific values for the common movies
