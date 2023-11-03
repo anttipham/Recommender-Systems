@@ -116,7 +116,7 @@ def get_similar_users(user_movie_df, user_id, similarity_type):
             sim = get_similarity(user_movie_df, user_id, other_user, similarity_type)
             sims.append((other_user, sim))
     sims.sort(key=lambda x: x[1], reverse=True)
-    return sims  # TODO change to return a dict??
+    return sims
 
 
 # print top-N most similar users to active user
