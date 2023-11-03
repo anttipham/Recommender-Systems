@@ -54,10 +54,9 @@ def pearson_corr(user_movie_df, user1, user2):
     user2_data = user_movie_df.loc[user2].dropna().to_frame()
     common = user1_data.index.intersection(user2_data.index)
 
-    if (
-        len(common) < 2
-    ):  # TODO handle this case differently? 1, 2, bigger?, remove if (return NaN)
-        return 0  # No common movies
+    # NOTE this means we don't calculate similarity measure when less than 3
+    if (len(common) < 3): 
+        return 0
 
     user1_ratings = user1_data.loc[common].values
     user2_ratings = user2_data.loc[common].values
@@ -79,9 +78,8 @@ def cosine_sim(user_movie_df, user1, user2, adjusted=False):
     user2_data = user_movie_df.loc[user2].dropna().to_frame()
     common = user1_data.index.intersection(user2_data.index)
 
-    if (
-        len(common) < 2
-    ):  # TODO handle this case differently? 1, 2, bigger?, remove if (return NaN)
+    # NOTE this means we don't calculate similarity measure when less than 3
+    if (len(common) < 3):
         return 0
 
     user1_ratings = user1_data.loc[common].values
@@ -131,7 +129,7 @@ def print_similar_users(user_movie_df, user_id, similarity_type="pearson"):
 
 def get_top_movies(
     user_movie_df: pd.DataFrame, user_id: int, similarity_type="pearson"
-) -> list[tuple(int, float)]:
+) -> list[tuple[int, float]]:
     similar_users = get_similar_users(user_movie_df, user_id, similarity_type)[:N]
     pearson_for_user = dict(similar_users)
     # Mean of the rating for user a
