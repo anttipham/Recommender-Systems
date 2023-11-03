@@ -16,8 +16,10 @@ N = 10
 USER_ID = 1
 
 
-# handle command-line args
 def parse_args():
+    """
+    Handle command-line args
+    """
     parser = argparse.ArgumentParser(
         description="Script for recommender system for MovieLens Dataset"
     )
@@ -31,8 +33,10 @@ def parse_args():
     return args.path
 
 
-# read data
 def read_movielens(path):
+    """
+    Read the MovieLens data from local directory
+    """
     ratings = pd.read_csv(os.path.join(path, "ratings.csv"))
 
     # Display 10 first rows of the ratings data
@@ -47,58 +51,71 @@ def read_movielens(path):
     return user_movie_df
 
 
-# calculate pearson correlation between users
 def pearson_corr(user_movie_df, user1, user2):
-    # find movies both users have rated
+    """
+    Calculate pearson correlation between users
+    """
+
+    # fetch user data from dataframe
     user1_data = user_movie_df.loc[user1].dropna().to_frame()
     user2_data = user_movie_df.loc[user2].dropna().to_frame()
+
+    # calculate user data means
+    user1_mean = user1_data.mean().values[0]
+    user2_mean = user2_data.mean().values[0]
+
+    # find common movies between the users
     common = user1_data.index.intersection(user2_data.index)
 
     # NOTE this means we don't calculate similarity measure when less than 3
     if (len(common) < 3): 
         return 0
 
+    # fetch user specific values for the common movies
     user1_ratings = user1_data.loc[common].values
     user2_ratings = user2_data.loc[common].values
 
-    user1_mean = user1_data.mean().values[0]
-    user2_mean = user2_data.mean().values[0]
-
     numerator = sum((user1_ratings - user1_mean) * (user2_ratings - user2_mean))
-    denominator = np.sqrt(sum((user1_ratings - user1_mean) ** 2)) * np.sqrt(
-        sum((user2_ratings - user2_mean) ** 2)
-    )
+    denominator = np.sqrt(sum((user1_ratings - user1_mean) ** 2)) \
+                * np.sqrt(sum((user2_ratings - user2_mean) ** 2))
     return (numerator / denominator)[0] if denominator else 0
 
 
-# calculate cosine similarity between users (normal or adjusted)
 def cosine_sim(user_movie_df, user1, user2, adjusted=False):
-    # find movies both have rated
+    """
+    Calculate cosine similarity between users (either normal or adjusted)
+    """
+    
+    # fetch user data from dataframe
     user1_data = user_movie_df.loc[user1].dropna().to_frame()
     user2_data = user_movie_df.loc[user2].dropna().to_frame()
+
+    # find common movies between the users
     common = user1_data.index.intersection(user2_data.index)
 
     # NOTE this means we don't calculate similarity measure when less than 3
-    if (len(common) < 3):
+    if (len(common) < 3): 
         return 0
 
+    # fetch user specific values for the common movies
     user1_ratings = user1_data.loc[common].values
     user2_ratings = user2_data.loc[common].values
 
-    if adjusted:  # normalize data
-        user1_mean = user1_data.mean().values[0]
-        user2_mean = user2_data.mean().values[0]
-
-        user1_ratings = user1_ratings - user1_mean
-        user2_ratings = user2_ratings - user2_mean
+    # adjusted cosine similarity normalizes the ratings
+    if adjusted:
+        user1_ratings = user1_ratings - user1_data.mean().values[0]
+        user2_ratings = user2_ratings - user2_data.mean().values[0]
 
     numerator = np.dot(user1_ratings.T, user2_ratings)
     denominator = np.linalg.norm(user1_ratings) * np.linalg.norm(user2_ratings)
     return (numerator / denominator)[0][0] if denominator else 0
 
 
-# return similarity value between two users depending on chosen metric
 def get_similarity(user_movie_df, user1, user2, similarity_type):
+    """
+    Return similarity value between two users depending on chosen metric
+    """
+
     if similarity_type == "cosine":
         sim = cosine_sim(user_movie_df, user1, user2)
     elif similarity_type == "adjusted_cosine":
@@ -108,8 +125,11 @@ def get_similarity(user_movie_df, user1, user2, similarity_type):
     return sim
 
 
-# calculate similarity for all users against active user
 def get_similar_users(user_movie_df, user_id, similarity_type):
+    """
+    Calculate similarity for all users against active user
+    """
+
     sims = []
     for other_user in user_movie_df.index:
         if other_user != user_id:
@@ -119,8 +139,11 @@ def get_similar_users(user_movie_df, user_id, similarity_type):
     return sims
 
 
-# print top-N most similar users to active user
 def print_similar_users(user_movie_df, user_id, similarity_type="pearson"):
+    """
+    Print top-N most similar users to active user
+    """
+
     print(f"Top-{N} most similar users to user {user_id}")
     similar_users = get_similar_users(user_movie_df, user_id, similarity_type)
     for user, _ in similar_users[:N]:
@@ -197,8 +220,8 @@ def main():
     print_top_movies(user_movie_df, USER_ID)
     print()
 
-    # e) design and implement new similarity function, we chose cosine similarity
-    print("e) design and implement new similarity function: cosine similarity")
+    # e) adjusted cosine similarity
+    print("e) design and implement adjusted cosine similarity")
     print("##")
     print_similar_users(user_movie_df, USER_ID, similarity_type="adjusted_cosine")
     print()
