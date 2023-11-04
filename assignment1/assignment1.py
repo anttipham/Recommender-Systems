@@ -1,9 +1,6 @@
 """
 DATA.ML.360 Recommender Systems - Assignment 1
-
-Sophie Tötterström
-Antti Pham
-
+Antti Pham, Sophie Tötterström
 """
 
 import argparse
@@ -153,8 +150,13 @@ def print_similar_users(user_movie_df, user_id, similarity_type="pearson"):
 def get_top_movies(
     user_movie_df: pd.DataFrame, user_id: int, similarity_type="pearson"
 ) -> list[tuple[int, float]]:
+    """
+    Returns top N matching movies for a given user
+    """
+
     similar_users = get_similar_users(user_movie_df, user_id, similarity_type)[:N]
     pearson_for_user = dict(similar_users)
+
     # Mean of the rating for user a
     a = user_id
     a_mean = user_movie_df.loc[a].mean()
@@ -178,17 +180,22 @@ def get_top_movies(
 
     # Movies that user a has not rated
     movies = user_movie_df[user_movie_df[user_id].isnull()].columns.astype(int)
+    
     # Predict ratings for movies
     predictions = [(movie, predict(user_movie_df, movie)) for movie in movies]
     predictions.sort(key=lambda x: x[1], reverse=True)
     return predictions
 
 
-# Return the top N movies for user a that user a has not seen before.
 def print_top_movies(
     user_movie_df: pd.DataFrame, user_id: int, similarity_type="pearson"
 ) -> None:
+    """
+    Return the top N movies for user a that user a has not seen before.
+    """
+
     predictions = get_top_movies(user_movie_df, user_id, similarity_type)
+
     # Print top N movies
     print(f"Top-{N} most relevant movies for user {USER_ID}")
     for movie, _ in predictions[:N]:
