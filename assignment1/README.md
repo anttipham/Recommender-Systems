@@ -1,13 +1,17 @@
 # Assignment 1: User-based Collaborative Filtering Recommendations
 
-
 ## Implementation Details and Assumptions
-- Similarity measure calculations  
-We perform calculations only for data where there are at least 3 movies both users have rated. Otherwise the similarity measure value is 0.
+
+- Similarity measure calculations
+  - We perform calculations only for data where there are at least 3 movies both users have rated. Otherwise the similarity measure value is 0.
+  - This is due to the fact that Pearson correlation can only get three values (-1, 0 and 1) if there are 2 movies rated by both users.
 - For our results we have selected USER_ID = 233.
 - We print all results to console output.
-- User needs to provide path when calling the script. Usage:  
-``` python assignment1.py -p/--path <path/to/ml-latest-small>```
+- User needs to provide path when calling the script. Usage:
+
+  ```python
+  python assignment1.py --path <path/to/ml-latest-small>
+  ```
 
 ## Results
 
@@ -66,11 +70,11 @@ Top-10 most relevant movies for user 233
 
 ### e) design and implement adjusted cosine similarity
 
-Various text books [1] and articles, as well as course material, have suggested cosine similarity as an option for computing the similarity of two users in collaborative filtering. 
+Various text books [1] and articles, as well as course material, have suggested cosine similarity as an option for computing the similarity of two users in collaborative filtering.
 
 An article by Fethi Fkih [2] compares different similarity measures for user-based collaborative filtering of the MovieLans dataset. The article demonstrates that cosine similarity while not performing quite as well as newly innovated and complex measures, works well for this application. Since it is also known to work well in various sources, we chose this as the baseline for our similarity.
 
-Something interesting to note is that the cosine similarity does not concider user biases by normalizing the data. This is something handled in the Pearson correlation. Especially user ratings seem to be easily biased (a user may be prone to give 5s while anothe 1s, thus their ratings overall not being very useful). Due to this we decided to investigate an option to normalize the data and found the *adjusted cosine similarity*. 
+Something interesting to note is that the cosine similarity does not concider user biases by normalizing the data. This is something handled in the Pearson correlation. Especially user ratings seem to be easily biased (a user may be prone to give 5s while anothe 1s, thus their ratings overall not being very useful). Due to this we decided to investigate an option to normalize the data and found the *adjusted cosine similarity*.
 
 The adjusted cosine similarity normalizes the data similarly as in Pearson correlation calculations which takies into account user bias. In addition, it addresses the sparsity problem of these often being missing ratings. We decided to implement both the "normal" cosine similarity function (for potential future use) as well as the adjusted version.
 
@@ -78,8 +82,7 @@ The adjusted cosine similarity normalizes the data similarly as in Pearson corre
 
 2. Fkih, Fethi. “Similarity Measures for Collaborative Filtering-Based Recommender Systems: Review and Experimental Comparison.” Journal of King Saud University. Computer and information sciences 34.9 (2022): 7645–7669. Web.
 
-
-Both adjusted and normal cosine similarity has been implemented in the `cosine_sim` function. 
+Both adjusted and normal cosine similarity has been implemented in the `cosine_sim` function.
 
 ```txt
 Top-10 most similar users to user 233
