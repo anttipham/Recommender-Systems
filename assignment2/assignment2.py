@@ -47,6 +47,26 @@ def read_movielens(ratings_file_path):
     user_movie_df = ratings.pivot(index="userId", columns="movieId", values="rating")
     return user_movie_df
 
+# a)
+# TODO copy user-based collaborative filtering approach
+# 1. generate movie recommendatins list for each user
+# 2. aggregate
+
+# TODO average
+# output relevance
+
+# TODO least misery
+
+# TODO  group of 3 users, and for this group, show the top-10 recommendations, 
+# i.e., the 10 movies with the highest prediction scores that (i) the average 
+# method suggests, and (ii) the least misery method suggest. 
+
+# b)
+# TODO results reviewed with disagreements
+# käytännössä fairness * relevance (missä relevance on (a) output)
+
+# TODO kendall tau
+
 
 def main():
     ratings_file_path = parse_args()
