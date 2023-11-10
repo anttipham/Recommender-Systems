@@ -13,16 +13,15 @@ SIMILARITY_TYPE = "pearson"
 
 
 def predict_without_similar_users(
-    user_movie_df, user_id, movie_id, similarity_type="pearson"
+    users_rec: dict[int, dict[int, float]], user_id, movie_id
 ):
     """
-    Predict rating for a movie without previously having similar users
+    Predict rating for a movie with precomputated values
     """
-
-    similar_users = assig1.get_similar_users(user_movie_df, user_id, similarity_type)[
-        :N
-    ]
-    return assig1.predict(user_movie_df, movie_id, similar_users, user_id)
+    for movie, rating in users_rec[user_id]:
+        if movie == movie_id:
+            return rating
+    raise ValueError("Movie not found")
 
 
 def get_group_recs(users_recs):
@@ -32,14 +31,14 @@ def get_group_recs(users_recs):
 
     group_recs = {}
     for user, recs in users_recs.items():
-        for movie, pred_rating in recs:
+        for movie, pred_rating in recs[:N]:
             if movie not in group_recs:
                 group_recs[movie] = []
             group_recs[movie].append((user, pred_rating))
     return group_recs
 
 
-def get_rating(user_movie_df, user, movie, similarity_type="pearson"):
+def get_rating(user_movie_df, users_recs, user, movie):
     """
     Either get real rating for the movie from user or predict it
     """
@@ -47,9 +46,7 @@ def get_rating(user_movie_df, user, movie, similarity_type="pearson"):
     rating = user_movie_df.loc[user, movie]
     if np.isnan(rating):
         # get predicted rating
-        rating = predict_without_similar_users(
-            user_movie_df, user, movie, similarity_type
-        )
+        rating = predict_without_similar_users(users_recs, user, movie)
     return rating
 
 
@@ -62,7 +59,7 @@ def get_sorted_group_recs(pred_ratings):
     return sorted_group_recs[:N]
 
 
-def average_aggregate(user_movie_df, users_recs, similarity_type="pearson"):
+def average_aggregate(user_movie_df, users_recs):
     """
     Perform average aggregation on recommendations for a group of users
     """
@@ -77,7 +74,7 @@ def average_aggregate(user_movie_df, users_recs, similarity_type="pearson"):
         total = 0
         for user in GROUP:
             if not any(user_id == user for user_id, _ in user_ratings):
-                total += get_rating(user_movie_df, user, movie, similarity_type)
+                total += get_rating(user_movie_df, users_recs, user, movie)
 
         # now also add the recommended movie ratings
         total = sum(pred_rating for _, pred_rating in user_ratings)
@@ -88,7 +85,7 @@ def average_aggregate(user_movie_df, users_recs, similarity_type="pearson"):
     return get_sorted_group_recs(avg_pred_ratings)
 
 
-def least_misery_aggregate(user_movie_df, users_recs, similarity_type="pearson"):
+def least_misery_aggregate(user_movie_df, users_recs):
     """
     Perform least misery aggregation on recommendations for a group of users
     """
@@ -104,7 +101,7 @@ def least_misery_aggregate(user_movie_df, users_recs, similarity_type="pearson")
         # find ratings for users who this movie was not recommended to
         for user in GROUP:
             if not any(user_id == user for user_id, _ in user_ratings):
-                rating = get_rating(user_movie_df, user, movie, similarity_type)
+                rating = get_rating(user_movie_df, users_recs, user, movie)
                 ratings.append(rating)
 
         # now also add the recommended movie ratings
@@ -121,16 +118,14 @@ def main():
     user_movie_df = assig1.read_movielens(ratings_file_path)
 
     ## a)
-    # Fetching data
+    print("Predicting movie ratings for each user")
     recs = {}
     for user in GROUP:
-        recs[user] = assig1.get_top_movies(user_movie_df, user, SIMILARITY_TYPE)[:N]
+        recs[user] = assig1.get_top_movies(user_movie_df, user, SIMILARITY_TYPE)
 
-    # Aggregating data
-    avg_group_recs = average_aggregate(user_movie_df, recs, SIMILARITY_TYPE)
-    least_misery_group_recs = least_misery_aggregate(
-        user_movie_df, recs, SIMILARITY_TYPE
-    )
+    print("Aggregating data")
+    avg_group_recs = average_aggregate(user_movie_df, recs)
+    least_misery_group_recs = least_misery_aggregate(user_movie_df, recs)
 
     # Displaying results
     print(f"\n## Top-{N} Recommendations for group {GROUP} ##")
