@@ -9,9 +9,12 @@ import assignment1 as assig1
 
 N = 10
 GROUP = [233, 322, 423]
+SIMILARITY_TYPE = "pearson"
 
 
-def predict_without_similar_users(user_movie_df, user_id, movie_id, similarity_type):
+def predict_without_similar_users(
+    user_movie_df, user_id, movie_id, similarity_type="pearson"
+):
     """
     Predict rating for a movie without previously having similar users
     """
@@ -36,7 +39,7 @@ def get_group_recs(users_recs):
     return group_recs
 
 
-def get_rating(user_movie_df, user, movie, similarity_type):
+def get_rating(user_movie_df, user, movie, similarity_type="pearson"):
     """
     Either get real rating for the movie from user or predict it
     """
@@ -59,7 +62,7 @@ def get_sorted_group_recs(pred_ratings):
     return sorted_group_recs[:N]
 
 
-def average_aggregate(user_movie_df, users_recs, similarity_type):
+def average_aggregate(user_movie_df, users_recs, similarity_type="pearson"):
     """
     Perform average aggregation on recommendations for a group of users
     """
@@ -85,7 +88,7 @@ def average_aggregate(user_movie_df, users_recs, similarity_type):
     return get_sorted_group_recs(avg_pred_ratings)
 
 
-def least_misery_aggregate(user_movie_df, users_recs, similarity_type):
+def least_misery_aggregate(user_movie_df, users_recs, similarity_type="pearson"):
     """
     Perform least misery aggregation on recommendations for a group of users
     """
@@ -114,7 +117,6 @@ def least_misery_aggregate(user_movie_df, users_recs, similarity_type):
 
 
 def main():
-    similarity_type = "pearson"
     ratings_file_path = assig1.parse_args()
     user_movie_df = assig1.read_movielens(ratings_file_path)
 
@@ -122,12 +124,12 @@ def main():
     # Fetching data
     recs = {}
     for user in GROUP:
-        recs[user] = assig1.get_top_movies(user_movie_df, user, N, similarity_type)[:N]
+        recs[user] = assig1.get_top_movies(user_movie_df, user, N, SIMILARITY_TYPE)[:N]
 
     # Aggregating data
-    avg_group_recs = average_aggregate(user_movie_df, recs, similarity_type)
+    avg_group_recs = average_aggregate(user_movie_df, recs, SIMILARITY_TYPE)
     least_misery_group_recs = least_misery_aggregate(
-        user_movie_df, recs, similarity_type
+        user_movie_df, recs, SIMILARITY_TYPE
     )
 
     # Displaying results
