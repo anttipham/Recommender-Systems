@@ -124,7 +124,7 @@ def main():
     # Fetching data
     recs = {}
     for user in GROUP:
-        recs[user] = assig1.get_top_movies(user_movie_df, user, N, SIMILARITY_TYPE)[:N]
+        recs[user] = assig1.get_top_movies(user_movie_df, user, SIMILARITY_TYPE)[:N]
 
     # Aggregating data
     avg_group_recs = average_aggregate(user_movie_df, recs, SIMILARITY_TYPE)

@@ -5,8 +5,11 @@ Antti Pham, Sophie Tötterström
 Reuse files from assignment 1
 """
 import argparse
-import pandas as pd
+
 import numpy as np
+import pandas as pd
+
+N = 10
 
 
 def parse_args():
@@ -128,7 +131,10 @@ def get_similar_users(user_movie_df, user_id, similarity_type):
 
 
 def predict(
-    user_movie_df: pd.DataFrame, movie_id: int, similar_users, user_id
+    user_movie_df: pd.DataFrame,
+    movie_id: int,
+    similar_users: dict[int, float],
+    user_id: int,
 ) -> float:
     pearson_for_user = dict(similar_users)
 
@@ -154,13 +160,13 @@ def predict(
 
 
 def get_top_movies(
-    user_movie_df: pd.DataFrame, user_id: int, n: int, similarity_type="pearson"
+    user_movie_df: pd.DataFrame, user_id: int, similarity_type="pearson"
 ) -> list[tuple[int, float]]:
     """
     Returns top N matching movies for a given user
     """
 
-    similar_users = get_similar_users(user_movie_df, user_id, similarity_type)[:n]
+    similar_users = get_similar_users(user_movie_df, user_id, similarity_type)[:N]
 
     # Movies that user a has not rated
     movies = user_movie_df[user_movie_df[user_id].isnull()].columns.astype(int)
