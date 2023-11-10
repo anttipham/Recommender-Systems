@@ -163,7 +163,7 @@ def get_top_movies(
     user_movie_df: pd.DataFrame, user_id: int, similarity_type="pearson"
 ) -> list[tuple[int, float]]:
     """
-    Returns top N matching movies for a given user
+    Returns matching movies for a given user
     """
 
     similar_users = get_similar_users(user_movie_df, user_id, similarity_type)[:N]
