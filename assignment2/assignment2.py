@@ -113,6 +113,31 @@ def least_misery_aggregate(user_movie_df, users_recs):
     return get_sorted_group_recs(least_misery_pred_ratings)
 
 
+def kendall_tau(movies1: list[int], movies2: list[int]):
+    """
+    Calculate Kendall tau for two groups of movies.
+    Movies that are not in both groups are ignored.
+    """
+
+    group1 = set(movies1)
+    group2 = set(movies2)
+
+    common = group1 & group2
+    n = len(common)
+
+    common1 = [movie for movie in movies1 if movie in common]
+    common2 = [movie for movie in movies2 if movie in common]
+    cumset2 = {common2[i]: set(common2[i+1:]) for i in range(n)}
+
+    tau = 0
+    for i in range(n-1):
+        for j in range(i+1, n):
+            if common1[j] not in cumset2[common1[i]]:
+                tau += 1
+
+    return tau
+
+
 def main():
     ratings_file_path = assig1.parse_args()
     user_movie_df = assig1.read_movielens(ratings_file_path)
