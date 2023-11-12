@@ -127,15 +127,37 @@ def kendall_tau(movies1: list[int], movies2: list[int]) -> int:
 
     common1 = [movie for movie in movies1 if movie in common]
     common2 = [movie for movie in movies2 if movie in common]
-    cumset2 = {common2[i]: set(common2[i+1:]) for i in range(n)}
+    cumset2 = {common2[i]: set(common2[i + 1 :]) for i in range(n)}
 
     tau = 0
-    for i in range(n-1):
-        for j in range(i+1, n):
+    for i in range(n - 1):
+        for j in range(i + 1, n):
             if common1[j] not in cumset2[common1[i]]:
                 tau += 1
 
     return tau
+
+
+def max_kendall_tau(
+    recommendations: list[int], user_recommendations: dict[int, list[int]]
+) -> int:
+    """
+    Evaluate Kendall tau distance of recommendations for all users.
+    Returns the maximum possible Kendall tau distance.
+    """
+
+    max_tau = 0
+    for user_recommendation in user_recommendations.values():
+        tau = kendall_tau(recommendations, user_recommendation)
+        max_tau = max(tau, max_tau)
+    return max_tau
+
+
+def first_elements(l: list[tuple[int, float]]) -> list[int]:
+    """
+    Get first elements from a list of tuples.
+    """
+    return [movie for movie, _ in l]
 
 
 def main():
@@ -144,29 +166,43 @@ def main():
 
     ## a)
     print("Predicting movie ratings for each user")
-    recs = {}
+    recs: dict[int, list[tuple[int, float]]] = {}
     for user in GROUP:
         recs[user] = assig1.get_top_movies(user_movie_df, user, SIMILARITY_TYPE)
 
     print("Aggregating data")
     avg_group_recs = average_aggregate(user_movie_df, recs)
     least_misery_group_recs = least_misery_aggregate(user_movie_df, recs)
+    avg_recs = first_elements(avg_group_recs)
+    least_misery_recs = first_elements(least_misery_group_recs)
 
     # Displaying results
     print(f"\n## Top-{N} Recommendations for group {GROUP} ##")
     print("Average aggregation: ")
-    for movie, _ in avg_group_recs:
+    for movie in avg_recs:
         print(f"{movie}")
 
     print("\nLeast misery aggregation: ")
-    for movie, _ in least_misery_group_recs:
+    for movie in least_misery_recs:
         print(f"{movie}")
 
     ## b)
-    # TODO results reviewed with disagreements
-    # käytännössä fairness * relevance (missä relevance on (a) output)
-
-    # TODO kendall tau
+    kendall_tau_avg = max_kendall_tau(
+        avg_recs, {user: first_elements(recs[user]) for user in recs}
+    )
+    kendall_tau_least_misery = max_kendall_tau(
+        least_misery_recs, {user: first_elements(recs[user]) for user in recs}
+    )
+    print("b)")
+    print(
+        "The max Kendall tau distance for average aggregation is:",
+        kendall_tau_avg,
+    )
+    print(
+        "The max Kendall tau distance for least misery aggregation is:",
+        kendall_tau_least_misery,
+    )
+    print("Thus the best is average aggregation.")
 
 
 if __name__ == "__main__":
