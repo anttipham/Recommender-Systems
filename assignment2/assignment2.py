@@ -113,9 +113,9 @@ def least_misery_aggregate(user_movie_df, users_recs):
     return get_sorted_group_recs(least_misery_pred_ratings)
 
 
-def kendall_tau(movies1: list[int], movies2: list[int]):
+def kendall_tau(movies1: list[int], movies2: list[int]) -> int:
     """
-    Calculate Kendall tau for two groups of movies.
+    Calculate Kendall tau distance for two groups of movies.
     Movies that are not in both groups are ignored.
     """
 
