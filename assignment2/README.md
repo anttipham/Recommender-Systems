@@ -31,6 +31,8 @@ For example, if we have two rankings:
 
 The Kendall tau distance is 3, since there are 3 pairs of items that are in different order: (1, 2), (1, 3), (2, 3).
 
+The Kendall tau distance requires that the two rankings have the same items. Thus, our method will first compute the intersection of the two rankings, and then compute the Kendall tau distance.
+
 #### Propose a method that takes disagreements into account when computing suggestions for the group
 
 We could use a method where we try to minimize the Kendall tau distance of the average or least misery method.
