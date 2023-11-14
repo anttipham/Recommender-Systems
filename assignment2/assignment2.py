@@ -4,6 +4,7 @@ Antti Pham, Sophie Tötterström
 """
 
 import numpy as np
+import pandas as pd
 
 import assignment1 as assig1
 
@@ -13,20 +14,35 @@ SIMILARITY_TYPE = "pearson"
 
 
 def predict_without_similar_users(
-    users_rec: dict[int, dict[int, float]], user_id, movie_id
-):
+    users_rec: dict[int, list[tuple[int, float]]], 
+    user_id: int, movie_id: int
+    ) -> float:
     """
     Predict rating for a movie with precomputated values
     """
+
     for movie, rating in users_rec[user_id]:
         if movie == movie_id:
             return rating
     raise ValueError("Movie not found")
 
 
-def get_group_recs(users_recs):
+def get_group_recs(
+    users_recs: dict[int, list[tuple[int, float]]]
+    ) -> dict[int, list[tuple[int, float]]]:
     """
-    Get recommendations for the group of users
+    Restructure the input data to be more suitable for aggregation
+
+    Args:
+        users_recs (dict[int, list[tuple[int, float]]]): dict with list of 
+            top-N recommendations tuple[movie_id, rating] for each user
+
+    Returns:
+        dict[int, tuple[int, float]]: dict with the movies recommended to all 
+            users in the group and their predicted ratings for these users,
+            where keys are the movie_ids and the values are tuples of users 
+            and their predicted ratings
+
     """
 
     group_recs = {}
@@ -38,7 +54,11 @@ def get_group_recs(users_recs):
     return group_recs
 
 
-def get_rating(user_movie_df, users_recs, user, movie):
+def get_rating(
+    user_movie_df: pd.DataFrame, 
+    users_recs: dict[int, list[tuple[int, float]]], 
+    user: int, movie: int
+    ) -> float:
     """
     Either get real rating for the movie from user or predict it
     """
@@ -50,7 +70,9 @@ def get_rating(user_movie_df, users_recs, user, movie):
     return rating
 
 
-def get_sorted_group_recs(pred_ratings):
+def get_sorted_group_recs(
+    pred_ratings: dict[int, float]
+    ) -> list[tuple[int, float]]:
     """
     Sort group recommendations by predicted rating
     """
@@ -59,7 +81,10 @@ def get_sorted_group_recs(pred_ratings):
     return sorted_group_recs[:N]
 
 
-def average_aggregate(user_movie_df, users_recs):
+def average_aggregate(
+    user_movie_df: pd.DataFrame, 
+    users_recs: dict[int, list[tuple[int, float]]]
+    ) -> list[tuple[int, float]]:
     """
     Perform average aggregation on recommendations for a group of users
     """
@@ -68,7 +93,7 @@ def average_aggregate(user_movie_df, users_recs):
     group_recs = get_group_recs(users_recs)
 
     # now perform the average aggregation
-    avg_pred_ratings = {}
+    avg_pred_ratings: dict[int, float] = {}
     for movie, user_ratings in group_recs.items():
         # find ratings for users who this movie was not recommended to
         total = 0
@@ -85,7 +110,10 @@ def average_aggregate(user_movie_df, users_recs):
     return get_sorted_group_recs(avg_pred_ratings)
 
 
-def least_misery_aggregate(user_movie_df, users_recs):
+def least_misery_aggregate(
+    user_movie_df: pd.DataFrame, 
+    users_recs: dict[int, list[tuple[int, float]]]
+    ) -> list[tuple[int, float]]:
     """
     Perform least misery aggregation on recommendations for a group of users
     """
@@ -179,6 +207,9 @@ def main():
     print("Aggregating data")
     avg_group_recs = average_aggregate(user_movie_df, recs)
     least_misery_group_recs = least_misery_aggregate(user_movie_df, recs)
+
+    print(type(avg_group_recs))
+    print(type(avg_group_recs[0]))
 
     # Displaying results
     print(f"\n## Top-{N} Recommendations for group {GROUP} ##")
