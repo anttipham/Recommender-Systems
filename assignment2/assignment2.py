@@ -68,8 +68,11 @@ def get_rating(
 
     rating = user_movie_df.loc[user, movie]
     if np.isnan(rating):
-        # get predicted rating
         rating = predict_without_similar_users(users_recs, user, movie)
+    # TODO decide if we want this logic
+    # if movie has been seen by user, set rating to 0 to avoid seeing it again
+    #else:
+    #    rating = 0
     return rating
 
 
@@ -93,19 +96,19 @@ def average_aggregate(
     """
 
     # first gather recommendations for each member of the group
-    group_recs = get_group_recs(users_recs)
+    group_recs: dict[int, list[tuple[int, float]]] = get_group_recs(users_recs)
 
     # now perform the average aggregation
     avg_pred_ratings: dict[int, float] = {}
     for movie, user_ratings in group_recs.items():
-        # find ratings for users who this movie was not recommended to
-        total = 0
-        for user in GROUP:
-            if not any(user_id == user for user_id, _ in user_ratings):
-                total += get_rating(user_movie_df, users_recs, user, movie)
 
-        # now also add the recommended movie ratings
-        total = sum(pred_rating for _, pred_rating in user_ratings)
+        # add the recommended movie ratings
+        total = sum(nth_elements(user_ratings, 2))
+
+        # find ratings for users who this movie was not recommended to
+        not_recommended_to = set(GROUP) - set(nth_elements(user_ratings, 1))
+        for user in not_recommended_to:
+            total += get_rating(user_movie_df, users_recs, user, movie) 
 
         # now we have the total for this movie, lets perform calculation
         avg_pred_ratings[movie] = total / len(GROUP)
@@ -127,16 +130,15 @@ def least_misery_aggregate(
     # now perform the average aggregation
     least_misery_pred_ratings = {}
     for movie, user_ratings in group_recs.items():
-        ratings = []
+
+        # add the recommended movie ratings
+        ratings = nth_elements(user_ratings, 2)
 
         # find ratings for users who this movie was not recommended to
-        for user in GROUP:
-            if not any(user_id == user for user_id, _ in user_ratings):
-                rating = get_rating(user_movie_df, users_recs, user, movie)
-                ratings.append(rating)
-
-        # now also add the recommended movie ratings
-        ratings.extend([pred_rating for _, pred_rating in user_ratings])
+        not_recommended_to = set(GROUP) - set(nth_elements(user_ratings, 1))
+        for user in not_recommended_to:
+            rating = get_rating(user_movie_df, users_recs, user, movie)
+            ratings.append(rating)      
 
         # now we have the total for this movie, lets perform calculation
         least_misery_pred_ratings[movie] = min(ratings)
@@ -205,8 +207,8 @@ def get_weight(
     Get weight based on similarity between two users (Kendall tau distance)
     """
 
-    movies1 = first_elements(users_recs[user1])
-    movies2 = first_elements(users_recs[user2])
+    movies1 = nth_elements(users_recs[user1], 1)
+    movies2 = nth_elements(users_recs[user2], 1)
     
     tau = kendall_tau_normalized(movies1, movies2)
     return 1 / tau
@@ -246,7 +248,7 @@ def kendall_tau_aggregate(
             total += pred_rating * user_weights[user_id]
 
         # and then the ones it wasn't recommended to
-        not_recommended_to = set(GROUP) - set(first_elements(user_ratings))
+        not_recommended_to = set(GROUP) - set(nth_elements(user_ratings, 1))
         for user in not_recommended_to:
             rating = get_rating(user_movie_df, users_recs, user, movie)
             total += rating * user_weights[user]
@@ -257,11 +259,12 @@ def kendall_tau_aggregate(
     return get_sorted_group_recs(weighted_avg_pred_ratings)
 
 
-def first_elements(l: list[tuple[int, float]]) -> list[int]:
+def nth_elements(l: list[tuple[int, float]], n: int) -> list[int]:
     """
-    Get first elements from a list of tuples.
+    Get nth elements from a list of tuples.
+    For example, if n = 1, then the first elements are returned.
     """
-    return [movie for movie, _ in l]
+    return [el[n-1] for el in l]
 
 
 def main():

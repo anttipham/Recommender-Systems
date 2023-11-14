@@ -2,6 +2,9 @@
 
 ## Implementation Details and Assumptions
 
+- movies that some users have already seen can still be recommended to the group if they are highly rated
+- aggregationg methods use either real or predicted ratings for movies when aggregating group recommendations
+- we allow ratings over 5 due to prediction function not forbidding it and it allows us to maintain order (if everything above 5 would become 5, a lot of predictions would be equal with each other even if factually they aren't)
 ## Results
 
 ### a)
