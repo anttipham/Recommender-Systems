@@ -11,7 +11,8 @@ from itertools import combinations
 import assignment1 as assig1
 
 N = 10
-GROUP = [233, 322, 423]
+# Two similar users, one dissimilar
+GROUP = [233, 609, 238]
 SIMILARITY_TYPE = "pearson"
 
 
