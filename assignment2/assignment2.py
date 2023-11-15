@@ -141,80 +141,12 @@ def least_misery_aggregate(
     return get_sorted_group_recs(least_misery_pred_ratings)
 
 
-def kendall_tau(movies1: list[int], movies2: list[int]) -> int:
-    """
-    Calculate Kendall tau distance for two groups of movies.
-    Movies that are not in both groups are ignored.
-
-    Note: the function fails if there are duplicate movies in one list,
-    e.g. kendall_tau([1,2,3,4], [4,2,4,3]) (duplicate 4 in second parameter).
-    """
-
-    group1 = set(movies1)
-    group2 = set(movies2)
-
-    common = group1 & group2
-    n = len(common)
-
-    common1 = [movie for movie in movies1 if movie in common]
-    common2 = [movie for movie in movies2 if movie in common]
-    cumset2 = {common2[i]: set(common2[i + 1 :]) for i in range(n)}
-
-    tau = 0
-    for i in range(n - 1):
-        for j in range(i + 1, n):
-            if common1[j] not in cumset2[common1[i]]:
-                tau += 1
-
-    return tau
-
-
-def kendall_tau_normalized(movies1: list[int], movies2: list[int]) -> float:
-    """
-    Calculate normalized Kendall tau distance for two groups of movies.
-    Movies that are not in both groups are ignored.
-
-    Normalized Kendall tau distance is in the range [0, 1] where 1 means
-    that the groups are identical and 0 means that the groups are completely
-    different.
-
-    The function returns 0 if there are 1 or less common movies.
-
-    Note: the function fails if there are duplicate movies in one list.
-    """
-    group1 = set(movies1)
-    group2 = set(movies2)
-
-    common = group1 & group2
-    n = len(common)
-    if n <= 1:
-        return 0
-
-    max_kendall_tau = n * (n - 1) / 2
-    return 1 - (kendall_tau(movies1, movies2) / max_kendall_tau)
-
-
 def nth_elements(l: list[tuple[int, float]], n: int) -> list[int]:
     """
     Get nth elements from a list of tuples.
     For example, if n = 1, then the first elements are returned.
     """
     return [el[n - 1] for el in l]
-
-
-def max_kendall_tau(
-    recommendations: list[int], user_recommendations: dict[int, list[int]]
-) -> int:
-    """
-    Evaluate Kendall tau distance of recommendations for all users.
-    Returns the maximum possible Kendall tau distance.
-    """
-
-    max_tau = 0
-    for user_recommendation in user_recommendations.values():
-        tau = kendall_tau(recommendations, user_recommendation)
-        max_tau = max(tau, max_tau)
-    return max_tau
 
 
 def main():
@@ -244,22 +176,26 @@ def main():
         print(f"{movie}")
 
     ## b)
-    kendall_tau_avg = max_kendall_tau(
-        avg_recs, {user: nth_elements(recs[user], 1) for user in recs}
-    )
-    kendall_tau_least_misery = max_kendall_tau(
-        least_misery_recs, {user: nth_elements(recs[user], 1) for user in recs}
-    )
-    print("b)")
-    print(
-        "The max Kendall tau distance for average aggregation is:",
-        kendall_tau_avg,
-    )
-    print(
-        "The max Kendall tau distance for least misery aggregation is:",
-        kendall_tau_least_misery,
-    )
-    print("Thus the best is average aggregation.")
+    # user_recommendations = {
+    #     user: nth_elements(recs[user], 1)[:KENDALL_COMPARE_N] for user in recs
+    # }
+    # average_recommendations = avg_recs[:KENDALL_COMPARE_N]
+    # least_misery_recommendations = least_misery_recs[:KENDALL_COMPARE_N]
+
+    # kendall_tau_avg = max_kendall_tau(average_recommendations, user_recommendations)
+    # print("b)")
+    # print(
+    #     "The max normalized Kendall tau distance for average aggregation is:",
+    #     kendall_tau_avg,
+    # )
+    # kendall_tau_least_misery = max_kendall_tau(
+    #     least_misery_recommendations, user_recommendations
+    # )
+    # print(
+    #     "The max normalized Kendall tau distance for least misery aggregation is:",
+    #     kendall_tau_least_misery,
+    # )
+    # print("Thus the best is average aggregation.")
 
 
 if __name__ == "__main__":
