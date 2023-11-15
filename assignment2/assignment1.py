@@ -9,7 +9,7 @@ import argparse
 import numpy as np
 import pandas as pd
 
-N = 10
+SIMILAR_USERS = 10
 
 
 def parse_args():
@@ -166,7 +166,9 @@ def get_top_movies(
     Returns matching movies for a given user
     """
 
-    similar_users = get_similar_users(user_movie_df, user_id, similarity_type)[:N]
+    similar_users = get_similar_users(user_movie_df, user_id, similarity_type)[
+        :SIMILAR_USERS
+    ]
 
     # Movies that user a has not rated
     movies = user_movie_df[user_movie_df[user_id].isnull()].columns.astype(int)
