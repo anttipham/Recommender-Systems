@@ -4,7 +4,8 @@
 
 - movies that some users have already seen can still be recommended to the group if they are highly rated
 - aggregationg methods use either real or predicted ratings for movies when aggregating group recommendations
-- we allow ratings over 5 due to prediction function not forbidding it and it allows us to maintain order (if everything above 5 would become 5, a lot of predictions would be equal with each other even if factually they aren't)
+- The prediction function can give a rating over 5. This is not a mistake, but a property of the prediction formula adding and subtracting the biases (movie mean ratings) of the users.
+
 ## Results
 
 ### a)
