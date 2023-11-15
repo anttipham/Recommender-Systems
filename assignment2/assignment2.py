@@ -16,9 +16,8 @@ SIMILARITY_TYPE = "pearson"
 
 
 def predict_without_similar_users(
-    users_rec: dict[int, list[tuple[int, float]]], 
-    user_id: int, movie_id: int
-    ) -> float:
+    users_rec: dict[int, list[tuple[int, float]]], user_id: int, movie_id: int
+) -> float:
     """
     Predict rating for a movie with precomputated values
     """
@@ -31,19 +30,19 @@ def predict_without_similar_users(
 
 def get_group_recs(
     users_recs: dict[int, list[tuple[int, float]]]
-    ) -> dict[int, list[tuple[int, float]]]:
+) -> dict[int, list[tuple[int, float]]]:
     """
     Restructure the user specific recommendations to be more suitably
     formatted for group recommendation aggregation
 
     Args:
-        users_recs (dict[int, list[tuple[int, float]]]): dict with list of 
+        users_recs (dict[int, list[tuple[int, float]]]): dict with list of
             top-N recommendations tuple[movie_id, rating] for each user
 
     Returns:
-        dict[int, tuple[int, float]]: dict with the movies recommended to all 
+        dict[int, tuple[int, float]]: dict with the movies recommended to all
             users in the group and their predicted ratings for these users,
-            where keys are the movie_ids and the values are tuples of users 
+            where keys are the movie_ids and the values are tuples of users
             and their predicted ratings
 
     """
@@ -58,10 +57,11 @@ def get_group_recs(
 
 
 def get_rating(
-    user_movie_df: pd.DataFrame, 
-    users_recs: dict[int, list[tuple[int, float]]], 
-    user: int, movie: int
-    ) -> float:
+    user_movie_df: pd.DataFrame,
+    users_recs: dict[int, list[tuple[int, float]]],
+    user: int,
+    movie: int,
+) -> float:
     """
     Either get real rating for the movie from user or predict it
     """
@@ -71,14 +71,12 @@ def get_rating(
         rating = predict_without_similar_users(users_recs, user, movie)
     # TODO decide if we want this logic
     # if movie has been seen by user, set rating to 0 to avoid seeing it again
-    #else:
+    # else:
     #    rating = 0
     return rating
 
 
-def get_sorted_group_recs(
-    pred_ratings: dict[int, float]
-    ) -> list[tuple[int, float]]:
+def get_sorted_group_recs(pred_ratings: dict[int, float]) -> list[tuple[int, float]]:
     """
     Sort group recommendations by predicted rating
     """
@@ -88,9 +86,8 @@ def get_sorted_group_recs(
 
 
 def average_aggregate(
-    user_movie_df: pd.DataFrame, 
-    users_recs: dict[int, list[tuple[int, float]]]
-    ) -> list[tuple[int, float]]:
+    user_movie_df: pd.DataFrame, users_recs: dict[int, list[tuple[int, float]]]
+) -> list[tuple[int, float]]:
     """
     Perform average aggregation on recommendations for a group of users
     """
@@ -101,14 +98,13 @@ def average_aggregate(
     # now perform the average aggregation
     avg_pred_ratings: dict[int, float] = {}
     for movie, user_ratings in group_recs.items():
-
         # add the recommended movie ratings
         total = sum(nth_elements(user_ratings, 2))
 
         # find ratings for users who this movie was not recommended to
         not_recommended_to = set(GROUP) - set(nth_elements(user_ratings, 1))
         for user in not_recommended_to:
-            total += get_rating(user_movie_df, users_recs, user, movie) 
+            total += get_rating(user_movie_df, users_recs, user, movie)
 
         # now we have the total for this movie, lets perform calculation
         avg_pred_ratings[movie] = total / len(GROUP)
@@ -117,9 +113,8 @@ def average_aggregate(
 
 
 def least_misery_aggregate(
-    user_movie_df: pd.DataFrame, 
-    users_recs: dict[int, list[tuple[int, float]]]
-    ) -> list[tuple[int, float]]:
+    user_movie_df: pd.DataFrame, users_recs: dict[int, list[tuple[int, float]]]
+) -> list[tuple[int, float]]:
     """
     Perform least misery aggregation on recommendations for a group of users
     """
@@ -130,7 +125,6 @@ def least_misery_aggregate(
     # now perform the average aggregation
     least_misery_pred_ratings = {}
     for movie, user_ratings in group_recs.items():
-
         # add the recommended movie ratings
         ratings = nth_elements(user_ratings, 2)
 
@@ -138,7 +132,7 @@ def least_misery_aggregate(
         not_recommended_to = set(GROUP) - set(nth_elements(user_ratings, 1))
         for user in not_recommended_to:
             rating = get_rating(user_movie_df, users_recs, user, movie)
-            ratings.append(rating)      
+            ratings.append(rating)
 
         # now we have the total for this movie, lets perform calculation
         least_misery_pred_ratings[movie] = min(ratings)
@@ -200,32 +194,30 @@ def kendall_tau_normalized(movies1: list[int], movies2: list[int]) -> float:
 
 
 def get_weight(
-    user1: int, user2: int, 
-    users_recs: dict[int, list[tuple[int, float]]]
-    ) -> float:
+    user1: int, user2: int, users_recs: dict[int, list[tuple[int, float]]]
+) -> float:
     """
     Get weight based on similarity between two users (Kendall tau distance)
     """
 
     movies1 = nth_elements(users_recs[user1], 1)
     movies2 = nth_elements(users_recs[user2], 1)
-    
+
     tau = kendall_tau_normalized(movies1, movies2)
     return 1 / tau
 
 
 def kendall_tau_aggregate(
-    user_movie_df: pd.DataFrame, 
-    users_recs: dict[int, list[tuple[int, float]]]
-    ) -> list[tuple[int, float]]:
+    user_movie_df: pd.DataFrame, users_recs: dict[int, list[tuple[int, float]]]
+) -> list[tuple[int, float]]:
     """
     Perform weighted average aggregation on recommendations for a group of users
 
-    Weighted average is based on similarity between users. Normalized Kendall 
+    Weighted average is based on similarity between users. Normalized Kendall
     Tau is calculated for all user pairs, and the weight is the inverse of this.
     Finally these are summed up, and this the final weight for each user.
     """
-    
+
     # loop through all user pairs to find how similar they are with eachother
     # use the similarity (kendall tau) to find the weight at which this user's
     # ratings should be considered in the final weighted average
@@ -242,7 +234,7 @@ def kendall_tau_aggregate(
     group_recs: dict[int, list[tuple[int, float]]] = get_group_recs(users_recs)
     for movie, user_ratings in group_recs.items():
         total = 0
-        
+
         # first loop through users who this movie was recommended to
         for user_id, pred_rating in user_ratings:
             total += pred_rating * user_weights[user_id]
@@ -264,7 +256,7 @@ def nth_elements(l: list[tuple[int, float]], n: int) -> list[int]:
     Get nth elements from a list of tuples.
     For example, if n = 1, then the first elements are returned.
     """
-    return [el[n-1] for el in l]
+    return [el[n - 1] for el in l]
 
 
 def main():
