@@ -9,8 +9,10 @@ import pandas as pd
 import assignment1 as assig1
 
 N = 10
+KENDALL_COMPARE_N = 50
 # Two similar users, one dissimilar
-GROUP = [233, 609, 238]
+# GROUP = [233, 609, 238]
+GROUP = [233, 322, 423]
 SIMILARITY_TYPE = "pearson"
 
 
@@ -48,7 +50,7 @@ def get_group_recs(
 
     group_recs = {}
     for user, recs in users_recs.items():
-        for movie, pred_rating in recs[:N]:
+        for movie, pred_rating in recs:
             if movie not in group_recs:
                 group_recs[movie] = []
             group_recs[movie].append((user, pred_rating))
@@ -81,7 +83,7 @@ def get_sorted_group_recs(pred_ratings: dict[int, float]) -> list[tuple[int, flo
     """
 
     sorted_group_recs = sorted(pred_ratings.items(), key=lambda x: x[1], reverse=True)
-    return sorted_group_recs[:N]
+    return sorted_group_recs
 
 
 def average_aggregate(
@@ -234,11 +236,11 @@ def main():
     # Displaying results
     print(f"\n## Top-{N} Recommendations for group {GROUP} ##")
     print("Average aggregation: ")
-    for movie in avg_recs:
+    for movie in avg_recs[:N]:
         print(f"{movie}")
 
     print("\nLeast misery aggregation: ")
-    for movie in least_misery_recs:
+    for movie in least_misery_recs[:N]:
         print(f"{movie}")
 
     ## b)
