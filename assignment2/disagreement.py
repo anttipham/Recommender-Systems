@@ -54,21 +54,17 @@ def kendall_tau(movies1: list[int], movies2: list[int]) -> int:
 #     return kendall_tau(movies1, movies2) / max_kendall_tau_dist
 
 
-# def kendall_tau_disagreement(
-#     recommendations: list[int], user_recommendations: dict[int, list[int]]
-# ) -> int:
-#     """
-#     Evaluate Kendall tau disagreement.
-#     This is defined as the difference of maximum and minimum distance.
-#     """
-#     max_tau = 0
-#     min_tau = 1
-#     for user_recommendation in user_recommendations.values():
-#         tau = kendall_tau_normalized(recommendations, user_recommendation)
-#         print(tau)
-#         max_tau = max(tau, max_tau)
-#         min_tau = min(tau, min_tau)
-#     return max_tau - min_tau
+def kendall_tau_sum(
+    recommendations: list[int], user_recommendations: list[list[int]]
+) -> int:
+    """
+    Evaluate Kendall tau disagreement.
+    This is defined as the difference of maximum and minimum distance.
+    """
+    tau = 0
+    for user_recommendation in user_recommendations:
+        tau += kendall_tau(recommendations, user_recommendation)
+    return tau
 
 
 def kemeny_young(recommendations_list: list[list[int]], n: int) -> list[int]:
@@ -130,7 +126,7 @@ def kemeny_young(recommendations_list: list[list[int]], n: int) -> list[int]:
     best_permutation: list[int] = []
     min_tau = float("inf")
     for permutation in itertools.permutations(movies):
-        tau = kendall_tau(permutation, movies)
+        tau = kendall_tau_sum(permutation, recommendations_list)
         if tau < min_tau:
             min_tau = tau
             best_permutation = permutation
