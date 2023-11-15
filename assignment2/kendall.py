@@ -51,17 +51,18 @@ def kendall_tau_normalized(movies1: list[int], movies2: list[int]) -> float:
     return kendall_tau(movies1, movies2) / max_kendall_tau_dist
 
 
-def max_kendall_tau(
+def kendall_tau_disagreement(
     recommendations: list[int], user_recommendations: dict[int, list[int]]
 ) -> int:
     """
-    Evaluate Kendall tau distance of recommendations for all users.
-    Returns the maximum possible Kendall tau distance.
+    Evaluate Kendall tau disagreement.
+    This is defined as the difference of maximum and minimum distance.
     """
-
     max_tau = 0
+    min_tau = 1
     for user_recommendation in user_recommendations.values():
         tau = kendall_tau_normalized(recommendations, user_recommendation)
         print(tau)
         max_tau = max(tau, max_tau)
-    return max_tau
+        min_tau = min(tau, min_tau)
+    return max_tau - min_tau
