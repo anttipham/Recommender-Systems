@@ -3,15 +3,14 @@ DATA.ML.360 Recommender Systems - Assignment 2
 Antti Pham, Sophie Tötterström
 """
 
+import disagreement as disag
 import numpy as np
 import pandas as pd
 
 import assignment1 as assig1
 
 N = 10
-KENDALL_COMPARE_N = 50
 # Two similar users, one dissimilar
-# GROUP = [233, 609, 238]
 GROUP = [233, 322, 423]
 SIMILARITY_TYPE = "pearson"
 
@@ -176,26 +175,15 @@ def main():
         print(f"{movie}")
 
     ## b)
-    # user_recommendations = {
-    #     user: nth_elements(recs[user], 1)[:KENDALL_COMPARE_N] for user in recs
-    # }
-    # average_recommendations = avg_recs[:KENDALL_COMPARE_N]
-    # least_misery_recommendations = least_misery_recs[:KENDALL_COMPARE_N]
-
-    # kendall_tau_avg = max_kendall_tau(average_recommendations, user_recommendations)
-    # print("b)")
-    # print(
-    #     "The max normalized Kendall tau distance for average aggregation is:",
-    #     kendall_tau_avg,
-    # )
-    # kendall_tau_least_misery = max_kendall_tau(
-    #     least_misery_recommendations, user_recommendations
-    # )
-    # print(
-    #     "The max normalized Kendall tau distance for least misery aggregation is:",
-    #     kendall_tau_least_misery,
-    # )
-    # print("Thus the best is average aggregation.")
+    # Limit number of recommendations to compare
+    recommendations_list = [
+        nth_elements(recommendations, 1) for recommendations in recs.values()
+    ]
+    kemeny_young = disag.kemeny_young(recommendations_list, N)
+    print(f"\n## Top-{N} Recommendations for group {GROUP} ##")
+    print("Kemeny-Young method: ")
+    for movie in kemeny_young:
+        print(f"{movie}")
 
 
 if __name__ == "__main__":
