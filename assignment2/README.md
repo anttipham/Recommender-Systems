@@ -41,9 +41,9 @@ The Kendall tau distance requires that the two rankings have the same items. Thu
 
 We could use a method where we try to minimize the Kendall tau distance of the average or least misery method.
 
-1. We will first compute the Kendall tau distance between a user in the group and the average method. We will repeat this for each user in the group, and sum the values.
+1. We will first compute the Kendall tau distance between a user in the group and the average method. We will repeat this for each user in the group. We will then compute the maximum Kendall tau distance.
 2. We will then repeat the same process for the least misery method.
-3. Choose the method with the lowest Kendall tau distance.
+3. Choose the method with the lowest maximum Kendall tau distance.
 
 #### Implement your method and explain why it is useful when producing group recommendations
 

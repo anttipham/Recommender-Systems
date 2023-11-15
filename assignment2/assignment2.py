@@ -6,8 +6,6 @@ Antti Pham, Sophie Tötterström
 import numpy as np
 import pandas as pd
 
-from itertools import combinations
-
 import assignment1 as assig1
 
 N = 10
@@ -194,64 +192,6 @@ def kendall_tau_normalized(movies1: list[int], movies2: list[int]) -> float:
     return 1 - (kendall_tau(movies1, movies2) / max_kendall_tau)
 
 
-def get_weight(
-    user1: int, user2: int, users_recs: dict[int, list[tuple[int, float]]]
-) -> float:
-    """
-    Get weight based on similarity between two users (Kendall tau distance)
-    """
-
-    movies1 = nth_elements(users_recs[user1], 1)
-    movies2 = nth_elements(users_recs[user2], 1)
-
-    tau = kendall_tau_normalized(movies1, movies2)
-    return 1 / tau
-
-
-def kendall_tau_aggregate(
-    user_movie_df: pd.DataFrame, users_recs: dict[int, list[tuple[int, float]]]
-) -> list[tuple[int, float]]:
-    """
-    Perform weighted average aggregation on recommendations for a group of users
-
-    Weighted average is based on similarity between users. Normalized Kendall
-    Tau is calculated for all user pairs, and the weight is the inverse of this.
-    Finally these are summed up, and this the final weight for each user.
-    """
-
-    # loop through all user pairs to find how similar they are with eachother
-    # use the similarity (kendall tau) to find the weight at which this user's
-    # ratings should be considered in the final weighted average
-    user_weights: dict[int, float] = {}
-    for user1, user2 in combinations(GROUP, 2):
-        weight = get_weight(user1, user2, users_recs)
-        user_weights[user1] = user_weights.get(user1, 0) + weight
-        user_weights[user2] = user_weights.get(user2, 0) + weight
-
-    # now onto aggregating the recommendations
-    weighted_avg_pred_ratings: dict[int, float] = {}
-
-    # gather recommendations for each member of the group
-    group_recs: dict[int, list[tuple[int, float]]] = get_group_recs(users_recs)
-    for movie, user_ratings in group_recs.items():
-        total = 0
-
-        # first loop through users who this movie was recommended to
-        for user_id, pred_rating in user_ratings:
-            total += pred_rating * user_weights[user_id]
-
-        # and then the ones it wasn't recommended to
-        not_recommended_to = set(GROUP) - set(nth_elements(user_ratings, 1))
-        for user in not_recommended_to:
-            rating = get_rating(user_movie_df, users_recs, user, movie)
-            total += rating * user_weights[user]
-
-        # now perform weighted average final calculation
-        weighted_avg_pred_ratings[movie] = total / sum(user_weights.values())
-
-    return get_sorted_group_recs(weighted_avg_pred_ratings)
-
-
 def nth_elements(l: list[tuple[int, float]], n: int) -> list[int]:
     """
     Get nth elements from a list of tuples.
@@ -260,35 +200,64 @@ def nth_elements(l: list[tuple[int, float]], n: int) -> list[int]:
     return [el[n - 1] for el in l]
 
 
+def max_kendall_tau(
+    recommendations: list[int], user_recommendations: dict[int, list[int]]
+) -> int:
+    """
+    Evaluate Kendall tau distance of recommendations for all users.
+    Returns the maximum possible Kendall tau distance.
+    """
+
+    max_tau = 0
+    for user_recommendation in user_recommendations.values():
+        tau = kendall_tau(recommendations, user_recommendation)
+        max_tau = max(tau, max_tau)
+    return max_tau
+
+
 def main():
     ratings_file_path = assig1.parse_args()
     user_movie_df = assig1.read_movielens(ratings_file_path)
 
     ## a)
     print("Predicting movie ratings for each user")
-    recs = {}
+    recs: dict[int, list[tuple[int, float]]] = {}
     for user in GROUP:
         recs[user] = assig1.get_top_movies(user_movie_df, user, SIMILARITY_TYPE)
 
     print("Aggregating data")
     avg_group_recs = average_aggregate(user_movie_df, recs)
     least_misery_group_recs = least_misery_aggregate(user_movie_df, recs)
+    avg_recs = nth_elements(avg_group_recs, 1)
+    least_misery_recs = nth_elements(least_misery_group_recs, 1)
 
     # Displaying results
     print(f"\n## Top-{N} Recommendations for group {GROUP} ##")
     print("Average aggregation: ")
-    for movie, _ in avg_group_recs:
+    for movie in avg_recs:
         print(f"{movie}")
 
     print("\nLeast misery aggregation: ")
-    for movie, _ in least_misery_group_recs:
+    for movie in least_misery_recs:
         print(f"{movie}")
 
     ## b)
-    kendall_tau_recs = kendall_tau_aggregate(user_movie_df, recs)
-    print("\nKendall tau weighted average aggregation: ")
-    for movie, _ in kendall_tau_recs:
-        print(f"{movie}")
+    kendall_tau_avg = max_kendall_tau(
+        avg_recs, {user: nth_elements(recs[user], 1) for user in recs}
+    )
+    kendall_tau_least_misery = max_kendall_tau(
+        least_misery_recs, {user: nth_elements(recs[user], 1) for user in recs}
+    )
+    print("b)")
+    print(
+        "The max Kendall tau distance for average aggregation is:",
+        kendall_tau_avg,
+    )
+    print(
+        "The max Kendall tau distance for least misery aggregation is:",
+        kendall_tau_least_misery,
+    )
+    print("Thus the best is average aggregation.")
 
 
 if __name__ == "__main__":
