@@ -1,4 +1,11 @@
-import itertools
+"""
+DATA.ML.360 Recommender Systems - Assignment 2
+File includes logic related to (b) section of the assignment.
+
+Antti Pham, Sophie Tötterström
+"""
+
+from itertools import permutations
 
 
 def kendall_tau(movies1: list[int], movies2: list[int]) -> int:
@@ -54,25 +61,60 @@ def kendall_tau(movies1: list[int], movies2: list[int]) -> int:
 #     return kendall_tau(movies1, movies2) / max_kendall_tau_dist
 
 
-def kendall_tau_sum(
+def kendall_tau_disagreement(
     recommendations: list[int], user_recommendations: list[list[int]]
 ) -> int:
     """
     Evaluate Kendall tau disagreement.
     This is defined as the difference of maximum and minimum distance.
     """
-    tau = 0
+    #tau = 0
+    #for user_recommendation in user_recommendations:
+    #    tau += kendall_tau(recommendations, user_recommendation)
+    #return tau
+
+    min_tau = float("inf")
+    max_tau = float("-inf")
     for user_recommendation in user_recommendations:
-        tau += kendall_tau(recommendations, user_recommendation)
-    return tau
+        tau = kendall_tau(recommendations, user_recommendation)
+        if tau < min_tau:
+            min_tau = tau
+        if tau > max_tau:
+            max_tau = tau
+    return abs(max_tau - min_tau)
 
 
-def kemeny_young(recommendations_list: list[list[int]], n: int) -> list[int]:
+def get_movies(recommendations_list: list[list[int]], n: int) -> list[int]:
     """
-    Runs the Kemeny-Young method.
+    Find n movies that are in all users' recommendations
+    """
 
-    Goes through all possible permutations of the recommendations and
-    calculates the Kendall tau distance for each permutation.
+    common_movies = set(recommendations_list[0])
+    for i in range(1, len(recommendations_list)):
+        common_movies &= set(recommendations_list[i])
+
+    # Find n movies that are in all users' recommendations
+    # Go in the order of
+    # 1st movie of 1st user, 1st movie of 2nd user, ...,
+    # 2nd movie of 1st user, 2nd movie of 2nd user, ...,
+    # 3rd movie of 1st user, 3rd movie of 2nd user, ..., etc
+    movies_list = []
+    for nth_movies in zip(*recommendations_list):
+        for movie in nth_movies:
+            if movie in common_movies and movie not in movies_list:
+                movies_list.append(movie)
+            if len(movies_list) > n:
+                movies_list = movies_list[:n]
+                return movies_list
+    raise ValueError("Not enough common movies")
+
+
+def modified_kemeny_young(recommendations_list: list[list[int]], n: int) -> list[int]:
+    """
+    Runs a modified version of the Kemeny-Young method.
+
+    Goes through all possible permutations of the recommendations and calculates 
+    the disagreement (based on the Kendall tau distance) for each permutation. 
     The permutation with the lowest distance is returned.
 
     The function goes through all permutations, so the time complexity is O(n!*n^2).
@@ -93,28 +135,9 @@ def kemeny_young(recommendations_list: list[list[int]], n: int) -> list[int]:
         ValueError: If there are not enough common movies in the recommendations.
     """
 
-    def get_movies() -> list[int]:
-        common_movies = set(recommendations_list[0])
-        for i in range(1, len(recommendations_list)):
-            common_movies &= set(recommendations_list[i])
-
-        # Find n movies that are in all users' recommendations
-        # Go in the order of
-        # 1st movie of 1st user, 1st movie of 2nd user, ...,
-        # 2nd movie of 1st user, 2nd movie of 2nd user, ...,
-        # 3rd movie of 1st user, 3rd movie of 2nd user, ..., etc
-        movies_list = []
-        for nth_movies in zip(*recommendations_list):
-            for movie in nth_movies:
-                if movie in common_movies and movie not in movies_list:
-                    movies_list.append(movie)
-                if len(movies_list) > n:
-                    movies_list = movies_list[:n]
-                    return movies_list
-        raise ValueError("Not enough common movies")
-
     # Get the movies that are in all users' recommendations
-    movies = get_movies()
+    movies = get_movies(recommendations_list, n)
+
     # Simplify the user recommendations to only contain the common movies
     recommendations_list = [
         [movie for movie in recommendations if movie in movies]
@@ -122,13 +145,14 @@ def kemeny_young(recommendations_list: list[list[int]], n: int) -> list[int]:
     ]
     # print(recommendations_list)
     # print(movies)
-    # Find the best permutation
-    best_permutation: list[int] = []
+
+    # Find the best permutation (aka order of recommendations)
+    best_recs_order: list[int] = []
     min_tau = float("inf")
-    for permutation in itertools.permutations(movies):
-        tau = kendall_tau_sum(permutation, recommendations_list)
+    for recc_order in permutations(movies):
+        tau = kendall_tau_disagreement(recc_order, recommendations_list)
         if tau < min_tau:
             min_tau = tau
-            best_permutation = permutation
+            best_recs_order = recc_order
 
-    return best_permutation
+    return best_recs_order

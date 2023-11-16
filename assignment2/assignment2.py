@@ -1,5 +1,7 @@
 """
 DATA.ML.360 Recommender Systems - Assignment 2
+Main runner script for assignment 2.
+
 Antti Pham, Sophie Tötterström
 """
 
@@ -13,19 +15,6 @@ N = 10
 # Two similar users, one dissimilar
 GROUP = [233, 322, 423]
 SIMILARITY_TYPE = "pearson"
-
-
-def predict_without_similar_users(
-    users_rec: dict[int, list[tuple[int, float]]], user_id: int, movie_id: int
-) -> float:
-    """
-    Predict rating for a movie with precomputated values
-    """
-
-    for movie, rating in users_rec[user_id]:
-        if movie == movie_id:
-            return rating
-    raise ValueError("Movie not found")
 
 
 def get_group_recs(
@@ -56,6 +45,19 @@ def get_group_recs(
     return group_recs
 
 
+def predict_without_similar_users(
+    users_rec: dict[int, list[tuple[int, float]]], user_id: int, movie_id: int
+) -> float:
+    """
+    Predict rating for a movie with precomputated values
+    """
+
+    for movie, rating in users_rec[user_id]:
+        if movie == movie_id:
+            return rating
+    raise ValueError("Movie not found")
+
+
 def get_rating(
     user_movie_df: pd.DataFrame,
     users_recs: dict[int, list[tuple[int, float]]],
@@ -69,10 +71,9 @@ def get_rating(
     rating = user_movie_df.loc[user, movie]
     if np.isnan(rating):
         rating = predict_without_similar_users(users_recs, user, movie)
-    # TODO decide if we want this logic
-    # if movie has been seen by user, set rating to 0 to avoid seeing it again
-    # else:
-    #    rating = 0
+    elif rating < 3.5:
+        # if user gave the movie below a 3.5 they don't want to see it again
+        rating = 0
     return rating
 
 
@@ -81,8 +82,8 @@ def get_sorted_group_recs(pred_ratings: dict[int, float]) -> list[tuple[int, flo
     Sort group recommendations by predicted rating
     """
 
-    sorted_group_recs = sorted(pred_ratings.items(), key=lambda x: x[1], reverse=True)
-    return sorted_group_recs
+    sorted_recs = sorted(pred_ratings.items(), key=lambda x: x[1], reverse=True)
+    return sorted_recs
 
 
 def average_aggregate(
@@ -109,7 +110,7 @@ def average_aggregate(
         # now we have the total for this movie, lets perform calculation
         avg_pred_ratings[movie] = total / len(GROUP)
 
-    return get_sorted_group_recs(avg_pred_ratings)
+    return nth_elements(get_sorted_group_recs(avg_pred_ratings), 1)
 
 
 def least_misery_aggregate(
@@ -137,7 +138,7 @@ def least_misery_aggregate(
         # now we have the total for this movie, lets perform calculation
         least_misery_pred_ratings[movie] = min(ratings)
 
-    return get_sorted_group_recs(least_misery_pred_ratings)
+    return nth_elements(get_sorted_group_recs(least_misery_pred_ratings), 1)
 
 
 def nth_elements(l: list[tuple[int, float]], n: int) -> list[int]:
@@ -159,10 +160,8 @@ def main():
         recs[user] = assig1.get_top_movies(user_movie_df, user, SIMILARITY_TYPE)
 
     print("Aggregating data")
-    avg_group_recs = average_aggregate(user_movie_df, recs)
-    least_misery_group_recs = least_misery_aggregate(user_movie_df, recs)
-    avg_recs = nth_elements(avg_group_recs, 1)
-    least_misery_recs = nth_elements(least_misery_group_recs, 1)
+    avg_recs = average_aggregate(user_movie_df, recs)
+    least_misery_recs = least_misery_aggregate(user_movie_df, recs)
 
     # Displaying results
     print(f"\n## Top-{N} Recommendations for group {GROUP} ##")
@@ -176,13 +175,11 @@ def main():
 
     ## b)
     # Limit number of recommendations to compare
-    recommendations_list = [
-        nth_elements(recommendations, 1) for recommendations in recs.values()
-    ]
-    kemeny_young = disag.kemeny_young(recommendations_list, N)
-    print(f"\n## Top-{N} Recommendations for group {GROUP} ##")
-    print("Kemeny-Young method: ")
-    for movie in kemeny_young:
+    recs_list = [nth_elements(reccs, 1) for reccs in recs.values()]
+    mod_kemeny_young = disag.modified_kemeny_young(recs_list, N)
+
+    print("\nModified Kemeny-Young aggregation: ")
+    for movie in mod_kemeny_young:
         print(f"{movie}")
 
 
