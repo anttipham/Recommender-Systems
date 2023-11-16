@@ -68,11 +68,6 @@ def kendall_tau_disagreement(
     Evaluate Kendall tau disagreement.
     This is defined as the difference of maximum and minimum distance.
     """
-    #tau = 0
-    #for user_recommendation in user_recommendations:
-    #    tau += kendall_tau(recommendations, user_recommendation)
-    #return tau
-
     min_tau = float("inf")
     max_tau = float("-inf")
     for user_recommendation in user_recommendations:
@@ -113,9 +108,9 @@ def modified_kemeny_young(recommendations_list: list[list[int]], n: int) -> list
     """
     Runs a modified version of the Kemeny-Young method.
 
-    Goes through all possible permutations of the recommendations and calculates 
-    the disagreement (based on the Kendall tau distance) for each permutation. 
-    The permutation with the lowest distance is returned.
+    Goes through all possible permutations of the recommendations and calculates
+    the disagreement (based on the Kendall tau distance) for each permutation.
+    The permutation with the disagreement is returned.
 
     The function goes through all permutations, so the time complexity is O(n!*n^2).
 
