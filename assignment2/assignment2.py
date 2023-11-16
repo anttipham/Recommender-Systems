@@ -71,9 +71,6 @@ def get_rating(
     rating = user_movie_df.loc[user, movie]
     if np.isnan(rating):
         rating = predict_without_similar_users(users_recs, user, movie)
-    elif rating < 3.5:
-        # if user gave the movie below a 3.5 they don't want to see it again
-        rating = 0
     return rating
 
 
@@ -82,8 +79,8 @@ def get_sorted_group_recs(pred_ratings: dict[int, float]) -> list[tuple[int, flo
     Sort group recommendations by predicted rating
     """
 
-    sorted_recs = sorted(pred_ratings.items(), key=lambda x: x[1], reverse=True)
-    return sorted_recs
+    sorted_group_recs = sorted(pred_ratings.items(), key=lambda x: x[1], reverse=True)
+    return sorted_group_recs
 
 
 def average_aggregate(
@@ -110,7 +107,7 @@ def average_aggregate(
         # now we have the total for this movie, lets perform calculation
         avg_pred_ratings[movie] = total / len(GROUP)
 
-    return nth_elements(get_sorted_group_recs(avg_pred_ratings), 1)
+    return get_sorted_group_recs(avg_pred_ratings)
 
 
 def least_misery_aggregate(
@@ -138,7 +135,7 @@ def least_misery_aggregate(
         # now we have the total for this movie, lets perform calculation
         least_misery_pred_ratings[movie] = min(ratings)
 
-    return nth_elements(get_sorted_group_recs(least_misery_pred_ratings), 1)
+    return get_sorted_group_recs(least_misery_pred_ratings)
 
 
 def nth_elements(l: list[tuple[int, float]], n: int) -> list[int]:
@@ -160,8 +157,10 @@ def main():
         recs[user] = assig1.get_top_movies(user_movie_df, user, SIMILARITY_TYPE)
 
     print("Aggregating data")
-    avg_recs = average_aggregate(user_movie_df, recs)
-    least_misery_recs = least_misery_aggregate(user_movie_df, recs)
+    avg_group_recs = average_aggregate(user_movie_df, recs)
+    least_misery_group_recs = least_misery_aggregate(user_movie_df, recs)
+    avg_recs = nth_elements(avg_group_recs, 1)
+    least_misery_recs = nth_elements(least_misery_group_recs, 1)
 
     # Displaying results
     print(f"\n## Top-{N} Recommendations for group {GROUP} ##")
@@ -175,7 +174,7 @@ def main():
 
     ## b)
     # Limit number of recommendations to compare
-    recs_list = [nth_elements(reccs, 1) for reccs in recs.values()]
+    recs_list = [nth_elements(ratings, 1) for ratings in recs.values()]
     mod_kemeny_young = disag.modified_kemeny_young(recs_list, N)
 
     print("\nModified Kemeny-Young aggregation: ")
