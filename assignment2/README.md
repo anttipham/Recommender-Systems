@@ -3,7 +3,7 @@
 ## Implementation Details and Assumptions
 
 - The prediction function can give a rating over 5. This is not a mistake, but a property of the prediction formula adding and subtracting the biases (movie mean ratings) of the users.
-- Movies that some users have already seen can still be recommended to the group if they are highly rated (score is above 3.5). This is based on the assumption that is a user really liked the movie, they might want to see it again.
+- Movies that some users have already seen can still be recommended to the group if the aggregation methods deems them to be best matches. This is based on the idea that a group member is open to seeing a movie again if everyone else is satisfied with the recommendation, and they liked it.
 - Aggregation methods in (a) use either real or predicted ratings for movies when aggregating group recommendations. This is due to many gaps in the dataset (users have often only rated a few movies). Now we can still concider their preferences when performing the group aggregation.
 
 ## Running the script
