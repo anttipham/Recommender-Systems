@@ -3,7 +3,7 @@
 ## Implementation Details and Assumptions
 
 - The prediction function can give a rating over 5. This is not a mistake, but a property of the prediction formula adding and subtracting the biases (movie mean ratings) of the users.
-- Movies that some users have already seen can still be recommended to the group if they are highly rated (score is above 3.5). This is based on the assumption that is a user really liked the movie, they might want to see it again.
+- Movies that some users have already seen can still be recommended to the group if the aggregation methods deems them to be best matches. This is based on the idea that a group member is open to seeing a movie again if everyone else is satisfied with the recommendation, and they liked it.
 - Aggregation methods in (a) use either real or predicted ratings for movies when aggregating group recommendations. This is due to many gaps in the dataset (users have often only rated a few movies). Now we can still concider their preferences when performing the group aggregation.
 
 ## Running the script
@@ -137,6 +137,10 @@ Note that at step 1, we go through the users' recommendations in the order of:
 1. The first movies in each users' recommendations.
 2. The second movies in each users' recommendations.
 3. etc. until we have found 10 movies that are in all users' recommendations.
+
+Our proposed method is now able to take into account disagreement via the metric defined above. Due to how it is defined, our method minimizes the disparity between user opinions, ensuring that not only do the recommendations align with the members of the group but also conciders their disagreement with each other. 
+
+In average aggregation the group recommendations may have movies which are suitable for some users but not for others. In least misery aggregation the recommendations may be movies that nobody hates but nobady really likes either. Our method however tries to minimize the disagreement between users, where the distance between their personal recommendations is minimized. This now means that the results should be both liked by the users but also where their opinions align with each other. 
 
 The implementation for our proposed group recommendation aggregation method can be found in the `disagreement.py/modified_kemeny_young` function. The function is extremely slow, since it has to go through all the permutations of the movies.
 
