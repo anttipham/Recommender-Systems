@@ -1,35 +1,46 @@
+import kendall
+
+
 def calc_satisfaction(group_recs: list[int], user_recs: list[int]) -> float:
     """
-    ks. luentodia s.12
-    Sama kuin mitä kalvoilla lukee, eli GroupListSatisfaction jaettuna jollain
-    normalisoivalla arvolla.
+    Calculates satisfaction score for one user.
 
-    Meidän tapauksessa:
-        Kendall tau -etäisyys jaettuna jollain tavalla, joka normalisoi
-        etäisyyden. Siis d/normalisoiva_arvo (emt. ks. wikipedia).
+    Satisfaction is defined from the Kendall tau distance between
+    the group recommendations and the user's personal recommendations.
+    But this value is normalized and adjusted such that the satisfaction score
+    of 1 means that the recommendations are identical and 0 means that the
+    recommendations are completely different.
+
+    This is similar to the satisfaction score in the course
+    material (lecture 7, slide 12) where GroupListSatisfaction is divided by
+    a normalizing value (UserListSatisfaction).
 
     Args:
-        group_recs (list[int]): Movie recommendations for the group in order.
-        user_recs (list[int]): Personal movie recommendations for one user.
+        group_recs (list[int]): Movie recommendations for the group in the order
+                                of best to worst.
+        user_recs (list[int]): Personal movie recommendations for one user in
+                               the order of best to worst.
 
     Returns:
         float: Satisfaction score.
     """
-    pass
+    return 1 - kendall.kendall_tau_normalized(group_recs, user_recs)
 
 
 def next_alpha(satisfactions: list[float]) -> float:
     """
-    ks. luentodia s. 18
+    Calculate next alpha from the satisfaction scores of the previous iteration.
+
+    Alpha is in the range of [0, 1].
 
     Args:
         satisfactions (list[list[float]]): Satisfaction scores of the previous
-        iteration for each user.
+                                           iteration for each user.
 
     Returns:
-        float: Next alpha score
+        float: Next alpha score.
     """
-    pass
+    return max(satisfactions) - min(satisfactions)
 
 
 def weighted_combination(
