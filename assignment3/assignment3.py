@@ -44,9 +44,31 @@ def next_alpha(satisfactions: list[float]) -> float:
 
 
 def weighted_combination(
-    least_misery: list[tuple[int, float]],
-    average: list[tuple[int, float]],
+    least_misery: dict[int, float],
+    average: dict[int, float],
     alpha: float,
 ) -> list[tuple[int, float]]:
-    """Ks. luentodia s. 17"""
-    pass
+    """
+    Calculate the weighted combination of the group aggregated scores of least 
+    misery and average methods, weighted appropriately with the alpha value.
+
+    This is done following the sequential hybrid aggregation model presented in
+    course material (lecture 7, slide 17).
+
+    Args:
+        least_misery (dict[int, float]): the movie, ratings pairs for the group,
+                                         aggregated with the least misery method.
+        average (dict[int, float]): the movie, ratings pairs for the group,
+                                    aggregated with the average method.
+        alpha (float): Alpha value of this iteration.
+
+    Returns:
+        list[tuple[int, float]]: The group recommendations in descending order.
+    """
+
+    scores: dict[int, float] = {}
+    for movie_id, avg_rating in average.items():
+        least_rating = least_misery[movie_id]
+        scores[movie_id] = (1 - alpha) * avg_rating + alpha * least_rating
+    return asg2.get_sorted_group_recs(scores)
+
