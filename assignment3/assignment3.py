@@ -1,4 +1,23 @@
+
+"""
+DATA.ML.360 Recommender Systems - Assignment 3
+Main file for the assignment.
+
+Antti Pham, Sophie Tötterström
+"""
+
 import kendall
+import assignment2 as asg2
+import assignment1 as asg1
+
+import pandas as pd
+
+
+N = 10
+# Two similar users, one dissimilar
+GROUP = [233, 322, 423]
+SIMILARITY_TYPE = "pearson"
+
 
 
 def calc_satisfaction(group_recs: list[int], user_recs: list[int]) -> float:
@@ -34,7 +53,7 @@ def next_alpha(satisfactions: list[float]) -> float:
     Alpha is in the range of [0, 1].
 
     Args:
-        satisfactions (list[list[float]]): Satisfaction scores of the previous
+        satisfactions (list[float]): Satisfaction scores of the previous
                                            iteration for each user.
 
     Returns:
@@ -72,3 +91,60 @@ def weighted_combination(
         scores[movie_id] = (1 - alpha) * avg_rating + alpha * least_rating
     return asg2.get_sorted_group_recs(scores)
 
+
+def get_movie_ratings_for_users(
+    user_movie_df: pd.DataFrame
+) -> dict[int, list[tuple[int, float]]]:
+    """
+    Gets user specific recommendations for all group members.
+
+    Args:
+        user_movie_df (pd.DataFrame): ratings dataset
+
+    Returns:
+        dict[int, list[tuple[int, float]]]: user_id, recommendation pairs
+    """
+
+    recs: dict[int, list[tuple[int, float]]] = {}
+    for user in GROUP:
+        recs[user] = asg1.get_top_movies(user_movie_df, user, SIMILARITY_TYPE)
+    return recs
+
+
+def main():
+
+    # Read data
+    user_movie_df = asg1.read_movielens(ratings_file_path=asg1.parse_args())
+
+    # Get recommendations for all group members and aggregate
+    recs = get_movie_ratings_for_users(user_movie_df)
+    avg_group_recs = asg2.average_aggregate(user_movie_df, 
+                                            recs, return_only_pred=True)
+    least_misery_group_recs = asg2.least_misery_aggregate(user_movie_df, 
+                                            recs, return_only_pred=True)
+
+    # set alpha for first iteration to 0 so only consider average aggregation
+    alphas = [0]
+    for iteration in range(0, 3):
+        
+        # Hybrid aggregation
+        hybrid_group_recs = weighted_combination(avg_group_recs,
+                                                 least_misery_group_recs,
+                                                 alpha=alphas[iteration])
+        hybrid_recs = asg2.nth_elements(hybrid_group_recs, 1)
+
+        # Display results
+        print(f"\n## Iteration {iteration+1} ##")
+        print(f"Top-{N} Hybrid Recommendations for group {GROUP}")
+        for movie in hybrid_recs[:N]:
+            print(f"{movie}")
+
+        # Finally update alpha for future iterations
+        satisfactions = [
+            calc_satisfaction(hybrid_recs, asg2.nth_elements(recs[user], 1))
+            for user in GROUP
+        ]
+        alphas.append(next_alpha(satisfactions))
+    
+if __name__ == "__main__":
+    main()
