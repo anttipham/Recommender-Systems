@@ -88,9 +88,9 @@ def get_sorted_group_recs(pred_ratings: dict[int, float]) -> list[tuple[int, flo
 
 
 def average_aggregate(
-    user_movie_df: pd.DataFrame, 
-    users_recs: dict[int, list[tuple[int, float]]], 
-    return_only_pred: bool = False
+    user_movie_df: pd.DataFrame,
+    users_recs: dict[int, list[tuple[int, float]]],
+    return_only_pred: bool = False,
 ) -> Union[list[tuple[int, float]], dict[int, float]]:
     """
     Perform average aggregation on recommendations for a group of users
@@ -119,13 +119,13 @@ def average_aggregate(
 
 
 def least_misery_aggregate(
-    user_movie_df: pd.DataFrame, 
-    users_recs: dict[int, list[tuple[int, float]]], 
-    return_only_pred: bool = False
-) -> Union[list[tuple[int, float]], dict[int, float]]:
+    user_movie_df: pd.DataFrame,
+    users_recs: dict[int, list[tuple[int, float]]],
+    return_only_pred: bool = False,
+) -> [list[tuple[int, float]], dict[int, float]]:
     """
     Perform least misery aggregation on recommendations for a group of users
-    
+
     Returns:
 
     """
@@ -147,7 +147,7 @@ def least_misery_aggregate(
 
         # now we have the total for this movie, lets perform calculation
         least_misery_pred_ratings[movie] = min(ratings)
-    
+
     if return_only_pred:
         return least_misery_pred_ratings
     return get_sorted_group_recs(least_misery_pred_ratings)

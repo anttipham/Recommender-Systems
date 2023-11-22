@@ -1,4 +1,3 @@
-
 """
 DATA.ML.360 Recommender Systems - Assignment 3
 Main file for the assignment.
@@ -16,7 +15,6 @@ N = 10
 # Two similar users, one dissimilar
 GROUP = [233, 322, 423]
 SIMILARITY_TYPE = "pearson"
-
 
 
 def calc_satisfaction(group_recs: list[int], user_recs: list[int]) -> float:
@@ -92,7 +90,7 @@ def weighted_combination(
 
 
 def get_movie_ratings_for_users(
-    user_movie_df: pd.DataFrame
+    user_movie_df: pd.DataFrame,
 ) -> dict[int, list[tuple[int, float]]]:
     """
     Gets user specific recommendations for all group members.
@@ -111,25 +109,23 @@ def get_movie_ratings_for_users(
 
 
 def main():
-
     # Read data
     user_movie_df = asg1.read_movielens(ratings_file_path=asg1.parse_args())
 
     # Get recommendations for all group members and aggregate
     recs = get_movie_ratings_for_users(user_movie_df)
-    avg_group_recs = asg2.average_aggregate(user_movie_df,
-                                            recs, return_only_pred=True)
-    least_misery_group_recs = asg2.least_misery_aggregate(user_movie_df,
-                                            recs, return_only_pred=True)
+    avg_group_recs = asg2.average_aggregate(user_movie_df, recs, return_only_pred=True)
+    least_misery_group_recs = asg2.least_misery_aggregate(
+        user_movie_df, recs, return_only_pred=True
+    )
 
     # set alpha for first iteration to 0 so only consider average aggregation
-    alphas = [0]
+    alphas = [0.0]
     for iteration in range(0, 3):
-
         # Hybrid aggregation
-        hybrid_group_recs = weighted_combination(avg_group_recs,
-                                                 least_misery_group_recs,
-                                                 alpha=alphas[iteration])
+        hybrid_group_recs = weighted_combination(
+            avg_group_recs, least_misery_group_recs, alpha=alphas[iteration]
+        )
         hybrid_recs = asg2.nth_elements(hybrid_group_recs, 1)
 
         # Display results
@@ -144,6 +140,7 @@ def main():
             for user in GROUP
         ]
         alphas.append(next_alpha(satisfactions))
+
 
 if __name__ == "__main__":
     main()
