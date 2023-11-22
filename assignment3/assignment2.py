@@ -7,13 +7,13 @@ NOTE: some functions have been edited from original format to be more suitable f
 Antti Pham, Sophie Tötterström
 """
 
-import assignment1 as assig1
-import disagreement as disag
-
 from typing import Union
 
+# import disagreement as disag
 import numpy as np
 import pandas as pd
+
+# import assignment1 as assig1
 
 N = 10
 # Two similar users, one dissimilar
@@ -161,41 +161,41 @@ def nth_elements(l: list[tuple[int, float]], n: int) -> list[int]:
     return [el[n - 1] for el in l]
 
 
-def main():
-    ratings_file_path = assig1.parse_args()
-    user_movie_df = assig1.read_movielens(ratings_file_path)
+# def main():
+#     ratings_file_path = assig1.parse_args()
+#     user_movie_df = assig1.read_movielens(ratings_file_path)
 
-    ## a)
-    print("Predicting movie ratings for each user")
-    recs: dict[int, list[tuple[int, float]]] = {}
-    for user in GROUP:
-        recs[user] = assig1.get_top_movies(user_movie_df, user, SIMILARITY_TYPE)
+#     ## a)
+#     print("Predicting movie ratings for each user")
+#     recs: dict[int, list[tuple[int, float]]] = {}
+#     for user in GROUP:
+#         recs[user] = assig1.get_top_movies(user_movie_df, user, SIMILARITY_TYPE)
 
-    print("Aggregating data")
-    avg_group_recs = average_aggregate(user_movie_df, recs)
-    least_misery_group_recs = least_misery_aggregate(user_movie_df, recs)
-    avg_recs = nth_elements(avg_group_recs, 1)
-    least_misery_recs = nth_elements(least_misery_group_recs, 1)
+#     print("Aggregating data")
+#     avg_group_recs = average_aggregate(user_movie_df, recs)
+#     least_misery_group_recs = least_misery_aggregate(user_movie_df, recs)
+#     avg_recs = nth_elements(avg_group_recs, 1)
+#     least_misery_recs = nth_elements(least_misery_group_recs, 1)
 
-    # Displaying results
-    print(f"\n## Top-{N} Recommendations for group {GROUP} ##")
-    print("Average aggregation: ")
-    for movie in avg_recs[:N]:
-        print(f"{movie}")
+#     # Displaying results
+#     print(f"\n## Top-{N} Recommendations for group {GROUP} ##")
+#     print("Average aggregation: ")
+#     for movie in avg_recs[:N]:
+#         print(f"{movie}")
 
-    print("\nLeast misery aggregation: ")
-    for movie in least_misery_recs[:N]:
-        print(f"{movie}")
+#     print("\nLeast misery aggregation: ")
+#     for movie in least_misery_recs[:N]:
+#         print(f"{movie}")
 
-    ## b)
-    # Limit number of recommendations to compare
-    recs_list = [nth_elements(ratings, 1) for ratings in recs.values()]
-    mod_kemeny_young = disag.modified_kemeny_young(recs_list, N)
+#     ## b)
+#     # Limit number of recommendations to compare
+#     recs_list = [nth_elements(ratings, 1) for ratings in recs.values()]
+#     mod_kemeny_young = disag.modified_kemeny_young(recs_list, N)
 
-    print("\nModified Kemeny-Young aggregation: ")
-    for movie in mod_kemeny_young:
-        print(f"{movie}")
+#     print("\nModified Kemeny-Young aggregation: ")
+#     for movie in mod_kemeny_young:
+#         print(f"{movie}")
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

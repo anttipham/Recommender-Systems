@@ -5,7 +5,7 @@ File includes kendall tau calculations.
 Antti Pham, Sophie Tötterström
 """
 
-from itertools import permutations
+# from itertools import permutations
 
 
 def kendall_tau(movies1: list[int], movies2: list[int]) -> int:
@@ -104,50 +104,50 @@ def get_movies(recommendations_list: list[list[int]], n: int) -> list[int]:
     raise ValueError("Not enough common movies")
 
 
-def modified_kemeny_young(recommendations_list: list[list[int]], n: int) -> list[int]:
-    """
-    Runs a modified version of the Kemeny-Young method.
+# def modified_kemeny_young(recommendations_list: list[list[int]], n: int) -> list[int]:
+#     """
+#     Runs a modified version of the Kemeny-Young method.
 
-    Goes through all possible permutations of the recommendations and calculates
-    the disagreement (based on the Kendall tau distance) for each permutation.
-    The permutation with the disagreement is returned.
+#     Goes through all possible permutations of the recommendations and calculates
+#     the disagreement (based on the Kendall tau distance) for each permutation.
+#     The permutation with the disagreement is returned.
 
-    The function goes through all permutations, so the time complexity is O(n!*n^2).
+#     The function goes through all permutations, so the time complexity is O(n!*n^2).
 
-    Movies are chosen in the order of
-    - the first movies of all the users
-    - the second movies of all the users
-    - the third movies of all the users
-    - etc.
+#     Movies are chosen in the order of
+#     - the first movies of all the users
+#     - the second movies of all the users
+#     - the third movies of all the users
+#     - etc.
 
-    Args:
-        recommendations_list (list[list[int]]): List of list of user's recommendations.
+#     Args:
+#         recommendations_list (list[list[int]]): List of list of user's recommendations.
 
-    Returns:
-        list[int]: A n-sized list of movies in the order of the best permutation.
+#     Returns:
+#         list[int]: A n-sized list of movies in the order of the best permutation.
 
-    Raises:
-        ValueError: If there are not enough common movies in the recommendations.
-    """
+#     Raises:
+#         ValueError: If there are not enough common movies in the recommendations.
+#     """
 
-    # Get the movies that are in all users' recommendations
-    movies = get_movies(recommendations_list, n)
+#     # Get the movies that are in all users' recommendations
+#     movies = get_movies(recommendations_list, n)
 
-    # Simplify the user recommendations to only contain the common movies
-    recommendations_list = [
-        [movie for movie in recommendations if movie in movies]
-        for recommendations in recommendations_list
-    ]
-    # print(recommendations_list)
-    # print(movies)
+#     # Simplify the user recommendations to only contain the common movies
+#     recommendations_list = [
+#         [movie for movie in recommendations if movie in movies]
+#         for recommendations in recommendations_list
+#     ]
+#     # print(recommendations_list)
+#     # print(movies)
 
-    # Find the best permutation (aka order of recommendations)
-    best_recs_order: list[int] = []
-    min_tau = float("inf")
-    for recc_order in permutations(movies):
-        tau = kendall_tau_disagreement(recc_order, recommendations_list)
-        if tau < min_tau:
-            min_tau = tau
-            best_recs_order = recc_order
+#     # Find the best permutation (aka order of recommendations)
+#     best_recs_order: list[int] = []
+#     min_tau = float("inf")
+#     for recc_order in permutations(movies):
+#         tau = kendall_tau_disagreement(recc_order, recommendations_list)
+#         if tau < min_tau:
+#             min_tau = tau
+#             best_recs_order = recc_order
 
-    return best_recs_order
+#     return best_recs_order
