@@ -139,12 +139,10 @@ def main():
         for movie, rating in hybrid_group_recs:
             if printed >= N:
                 break
-            if movie in already_recommended:
-                continue
-            # movie hasn't been recommended before
-            print(f"Movie number: {movie},\tPredicted rating: {rating:.3}")
-            printed += 1
-            already_recommended.add(movie)
+            if movie not in already_recommended:
+                print(f"Movie number: {movie},\tPredicted rating: {rating:.3}")
+                printed += 1
+                already_recommended.add(movie)
 
         # Update alpha for future iterations
         satisfactions = [
@@ -152,8 +150,6 @@ def main():
             for user in GROUP
         ]
         alphas.append(next_alpha(satisfactions))
-        # print()
-        # print(*satisfactions, sep="\n")
 
 
 if __name__ == "__main__":
