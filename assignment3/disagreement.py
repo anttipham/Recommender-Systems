@@ -13,8 +13,10 @@ def kendall_tau(movies1: list[int], movies2: list[int]) -> int:
     Calculate Kendall tau distance for two groups of movies.
     Movies that are not in both groups are ignored.
 
-    Note: the function fails if there are duplicate movies in one list,
-    e.g. kendall_tau([1,2,3,4], [4,2,4,3]) (duplicate 4 in second parameter).
+    Raises:
+        ValueError: If there are duplicate movies in one list,
+                    e.g. kendall_tau([1,2,3,4], [4,2,4,3])
+                    (duplicate 4 in second parameter).
     """
 
     group1 = set(movies1)
@@ -25,6 +27,9 @@ def kendall_tau(movies1: list[int], movies2: list[int]) -> int:
 
     common1 = [movie for movie in movies1 if movie in common]
     common2 = [movie for movie in movies2 if movie in common]
+    if len(common1) != len(common2):
+        raise ValueError("Duplicate movies in one list")
+
     cumset2 = {common2[i]: set(common2[i + 1 :]) for i in range(n)}
 
     tau = 0
