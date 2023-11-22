@@ -9,16 +9,15 @@ Antti Pham, Sophie Tötterström
 
 from typing import Union
 
-# import disagreement as disag
 import numpy as np
 import pandas as pd
 
-# import assignment1 as assig1
+from assignment3 import GROUP
 
-N = 10
+# N = 10
 # Two similar users, one dissimilar
-GROUP = [233, 322, 423]
-SIMILARITY_TYPE = "pearson"
+# GROUP = [233, 322, 423]
+# SIMILARITY_TYPE = "pearson"
 
 
 def get_group_recs(
