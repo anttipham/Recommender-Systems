@@ -18,7 +18,9 @@ it difficult to calculate the next recommendation.
 
 ### Design (Score: 30%) and implement (Score: 30%) new method for producing sequential group recommendations
 
-<!-- TODO: Jokin johdanto? -->
+Group recommendations combine the recommendations of each user in a group into one aggregated list of recommendation. This is done with a chosen aggregation method (e.g. by averaging out individual predicted scores for a movie and then seeing how much the group likes it and if it should be recommended).
+
+Sometimes a user (or group of users) may want more recommendations, which are calculated in the similar method as before but are not the same movies as recommended before. This process is known as *sequential recommendation*. For a set number of iterations, top-k movie recommendations are provided. Sequential group recommendations include the additional step of aggregating individual user recommendations.
 
 #### **Satisfaction**
 
@@ -68,9 +70,9 @@ $$ score_g(i) = \min_{u \in g}{\hat{r_{ui}}} $$
 As one might predict, the recommended movies are unlikely to ilicit strong reactions, either positive or negative. This is  implemented in the `assignment3/assignment2.py/least_misery_aggregate` function.
 
 #### **Sequential Hybrid Aggregation Model**
-<!-- Vähän tekstiä että mikä on sequential recommendation -->
+As described before, sequential recommendations is when we have multiple iterations of providing recommendatins. The first iteration more simple but the recommendations from the following iterations need to concider the results from earlier iterations. This includes different thiings depending on the recommendation aggregation method, however, something common is the need to provide new recommendations in each iteration.
 
-To solve the issues with average and least misery aggregation, we combine them in a way which captures the advantages of both methods. This is known as sequential hybrid aggregation.
+Like described, group recommendation aggregation methods include some issues. To solve these with average and least misery aggregation, we combine them in a way which captures the advantages of both methods. This is known as sequential hybrid aggregation.
 
 In this method, the score from both the abovementioned methods are joined with a weighted combination. Thus the group $g$ rating $score$ for the movie $i$ on recommendation iteration $j$ is as follows:
 
@@ -78,20 +80,18 @@ $$ score_g(i, j) = (1 - \alpha _j)*avg\_score_g(i, j) + \alpha _j * least\_score
 $$
 
 The weight of each aggregation method for iteration $j$ depends on the value of $\alpha _j \in [0,1]$. From this definition we see that when $\alpha _j$ is 0, the least misery score is completely ignored, and only the average aggregation score effects the hybrid recommendation score. In this case, the best options for the entire group as a whole are concidered, without giving any additional weight to the users. When $\alpha _j$ is 1, only the least misery score effects the result.
-<!-- Lisää sepitystä näistä -->
+<!-- Antti: tarviiko tää jotain lisää? -->
 
 Weighted combination calculation is implemented in the `assignment3/assignment3.py/weighted_combination` function.
 
-$\alpha _j$ is calculated using the satisfation scores defined above from the previous iteration $j-1$, following the equation
+$\alpha _j$ needs to be a value which considers both aggregation method results in a reasonable way. We want it to change during each iteration, so that the suitability of some group recommendations are evaluated and then concidered in the next iteration. This should especially adapt so that a user who was dissapointed in the recommendations would be more satisfied in the following iteration. Now from course materials (Lecture 7, slide 18) we define that $\alpha _j$ is calculated using the satisfation scores defined above from the previous iteration $j-1$, following the equation
 
 $$
 \alpha _j = \max _{u \in g} sat(G_u, G_{score_{j-1}}) - \min _{u \in g} sat(u, G_{score_{j-1}}),
 $$
 
 where $G_{score_{j-1}}$ is defined as the top 10 group aggregation scores of
-the previous iteration.
-
-<!-- Tekstiä tästä logiikasta-->
+the previous iteration. This equation ensures that if all users were similarly happy with the recommendations, $\alpha _j$ will get values closer to 0, and promote average aggregation results. On the other hand, if someone was very dissapointed compared to someone else, the least misery aggregation result will have a higher weight in the following iteration since it tries to make sure no one is dissapointed.
 
 Alpha value calculation is implemented in the `assignment3/assignment3.py/next_alpha` function.
 
