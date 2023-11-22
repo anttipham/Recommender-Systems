@@ -12,9 +12,10 @@ import assignment1 as asg1
 import assignment2 as asg2
 
 N = 10
-# Two similar users, one dissimilar
-GROUP = [233, 322, 423]
+GROUP = [233, 9, 242]
+# GROUP = [233, 423, 242]
 SIMILARITY_TYPE = "pearson"
+ITERATIONS = 3
 
 
 def calc_satisfaction(group_recs: list[int], user_recs: list[int]) -> float:
@@ -40,7 +41,8 @@ def calc_satisfaction(group_recs: list[int], user_recs: list[int]) -> float:
     Returns:
         float: Satisfaction score.
     """
-    return 1 - disag.kendall_tau_normalized(group_recs, user_recs)
+    satisfation = 1 - disag.kendall_tau_normalized(group_recs, user_recs)
+    return satisfation
 
 
 def next_alpha(satisfactions: list[float]) -> float:
@@ -121,7 +123,7 @@ def main():
 
     # set alpha for first iteration to 0 so only consider average aggregation
     alphas = [0.0]
-    for iteration in range(0, 3):
+    for iteration in range(ITERATIONS):
         # Hybrid aggregation
         hybrid_group_recs = weighted_combination(
             avg_group_recs, least_misery_group_recs, alpha=alphas[iteration]
@@ -129,17 +131,19 @@ def main():
         hybrid_recs = asg2.nth_elements(hybrid_group_recs, 1)
 
         # Display results
-        print(f"\n## Iteration {iteration+1} ##")
+        print(f"\n## Iteration {iteration+1}, alpha={alphas[iteration]:.2} ##")
         print(f"Top-{N} Hybrid Recommendations for group {GROUP}")
-        for movie in hybrid_recs[:N]:
-            print(f"{movie}")
+        for movie, rating in hybrid_group_recs[:N]:
+            print(f"Movie number: {movie},\tPredicted rating: {rating:.3}")
 
         # Finally update alpha for future iterations
         satisfactions = [
-            calc_satisfaction(hybrid_recs, asg2.nth_elements(recs[user], 1))
+            calc_satisfaction(hybrid_recs[:N], asg2.nth_elements(recs[user], 1))
             for user in GROUP
         ]
         alphas.append(next_alpha(satisfactions))
+        # print()
+        # print(*satisfactions, sep="\n")
 
 
 if __name__ == "__main__":
