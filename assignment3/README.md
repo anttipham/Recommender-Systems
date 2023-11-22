@@ -109,11 +109,12 @@ Weighted combination calculation is implemented in the `assignment3/assignment3.
 $\alpha _j$ needs to be a value which considers both aggregation method results in a reasonable way. We want it to change during each iteration, so that the suitability of some group recommendations are evaluated and then concidered in the next iteration. This should especially adapt so that a user who was dissapointed in the recommendations would be more satisfied in the following iteration. Now from course materials (Lecture 7, slide 18) we define that $\alpha _j$ is calculated using the satisfation scores defined above from the previous iteration $j-1$, following the equation
 
 $$
-\alpha _j = \max _{u \in g} sat(G_u, G_{score_{j-1}}) - \min _{u \in g} sat(G_u, G_{score_{j-1}}),
+\alpha _j = \max _{u \in G} sat(ur, Gr_{j-1}) - \min _{u \in g} sat(ur, Gr_{j-1}),
 $$
 
-where $G_{score_{j-1}}$ is defined as the top 10 group aggregation scores of
-the previous iteration. This equation ensures that if all users were similarly happy with the recommendations, $\alpha _j$ will get values closer to 0, and promote average aggregation results. On the other hand, if someone was very dissapointed compared to someone else, the least misery aggregation result will have a higher weight in the following iteration since it tries to make sure no one is dissapointed.
+where $G$ is the group of users $u$ and $sat(ur, Gr_{j-1})$ the satisfaction of user $u$ on the previous iteration's top-10 group recommendations $Gr_{j-1}$. Due to the way we have define satisfaction (see above), this is calculated using the the user's recommendations $ur$.
+
+This equation ensures that if all users were similarly happy with the recommendations, $\alpha _j$ will get values closer to 0, and promote average aggregation results. On the other hand, if someone was very dissapointed compared to someone else, the least misery aggregation result will have a higher weight in the following iteration since it tries to make sure no one is dissapointed.
 
 Alpha value calculation is implemented in the `assignment3/assignment3.py/next_alpha` function.
 
