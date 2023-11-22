@@ -28,27 +28,21 @@ recommendations in each iteration.
 - We print all results to console output straight from `main`. To change anything around (user group members etc.), please see the following global variables in `assignment3.py`
 
     ```python
-    N = 10
+    N = 10 # this is our k in 'top-k'
     GROUP = [233, 9, 242]
     SIMILARITY_TYPE = "pearson"
     ITERATIONS = 3
     ```
 
 ### Design (Score: 30%) and implement (Score: 30%) new method for producing sequential group recommendations
-<!-- Ei varmaan tarvita? -->
-<!-- Group recommendations combine the recommendations of each user in a group into one aggregated list of recommendation. This is done with a chosen aggregation method (e.g. by averaging out individual predicted scores for a movie and then seeing how much the group likes it and if it should be recommended).
 
-Sometimes a user (or group of users) may want more recommendations, which are calculated in the similar method as before but are not the same movies as recommended before. This process is known as *sequential recommendation*. For a set number of iterations, top-k movie recommendations are provided. Sequential group recommendations include the additional step of aggregating individual user recommendations. -->
+Our method is based on calculating the group $g$ $score_g(i, j)$ for all movies $i$. This is done for a chosen number of iterations $j$, where $j=1$ at the start. Then, this is iterated and $score_g(i, j+1)$ is calculated for all movies. Then $score_g(i, j+2)$, then $score_g(i, j+3)$ etc., until limit `ITERATIONS` is reached.
 
-Our method is based on calculating $score_g(i, j)$ for all $i$ where $i$ is the movie number, $j$ is the iteration number which is $j=1$ at the start, and $g$ is the group. Then, this is iterated and $score_g(i, j+1)$ is calculated for all movies. Then $score_g(i, j+2)$, then $score_g(i, j+3)$ etc.
-
-When $score_g(i, j)$ is calculated for all movies $i$ for iteration $j$, the top 10 scores are selected and the movies are provided as recommendations.
-
-Then, the next iteration is performed, and the next recommendations are calculated. The next 10 recommendations are provided, but the movies that were recommended in the previous iterations are not included.
+During an iteration, $score_g(i, j)$ is calculated for all movies, and top-10 scores are selected and the movies are provided as recommendations. Then the next iteration is performed, and recommendations are calculated. The top-10 recommendations are provided without previous iterations' recommendations.
 
 #### **Satisfaction**
 
-(We assume that Kendall tau distance is already known from our assignment 2.)
+(We assume that Kendall tau distance is already known from our assignment 2. Please see `assignment2/README.md` for a detailed description.)
 
 Satisfaction is defined from the Kendall tau distance between
 the group recommendations $R_G$ and the user's personal recommendations $R_u$.
@@ -79,7 +73,7 @@ Satisfaction value calculation is implemented in the `assignment3/assignment3.py
 
 #### **Group Aggregation**
 
-Common group recommendation aggregation methods include the average aggregation, and least misery. These are assumed to be known from assingment 2, however, they are described below.
+Group recommendations combine the recommendations of each user in a group into one aggregated list of recommendation. Common group recommendation aggregation methods include the average aggregation, and least misery. These are assumed to be known from assingment 2, however, they are described below.
 
 In average aggregation all members are considered equals. So, the rating of an item for a group of users will be given be averaging the scores of an item across all group members. The movie $i$ group score is equal to the average of predicted ratings for all the group $g$ members, i.e.:
 
@@ -95,9 +89,9 @@ As one might predict, the recommended movies are unlikely to ilicit strong react
 
 #### **Sequential Hybrid Aggregation Model**
 
-As described before, sequential recommendations is when we have multiple iterations of providing recommendatins. The first iteration more simple but the recommendations from the following iterations need to concider the results from earlier iterations. This includes different thiings depending on the recommendation aggregation method, however, something common is the need to provide new recommendations in each iteration.
+Sequential recommendations have multiple iterations of providing top-k movie recommendations. The first iteration is more simple but the recommendations from the following iterations need to concider the results from earlier iterations. For our case, this includes which movies were recommended in previous iterations, and how users liked them.
 
-Like described, group recommendation aggregation methods include some issues. To solve these with average and least misery aggregation, we combine them in a way which captures the advantages of both methods. This is known as sequential hybrid aggregation.
+Like described above, group recommendation aggregation methods have some issues. To solve these with average (outlier never satisfied) and least misery aggregation (nobody loves/hates), we combine them in a way which captures the advantages of both methods. When done for multiple iterations, this is known as sequential hybrid aggregation. 
 
 In this method, the score from both the abovementioned methods are joined with a weighted combination. Thus the group $g$ rating $score$ for the movie $i$ on recommendation iteration $j$ is as follows:
 
@@ -127,9 +121,9 @@ Alpha value calculation is implemented in the `assignment3/assignment3.py/next_a
 
 The overall algorithm implementation for our proposed sequential hybrid aggregation model is implemented in the `assignment3/assignment3.py/main` function.
 
-### Provide detailed explanations and clarifications about why the method you propose works well for the case of sequential group recommendations (Score: 25%)
+### **Provide detailed explanations and clarifications about why the method you propose works well for the case of sequential group recommendations (Score: 25%)**
 
-Some explanations have probably been explained above, but we will summarize the most important points here.
+Further examplanations can be found above, but we will summarize the most important points here.
 
 Our method contains several key components that ensure that the method works well for sequential group recommendations.
 
