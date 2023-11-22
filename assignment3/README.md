@@ -18,7 +18,7 @@ it difficult to calculate the next recommendation.
 
 ### Design (Score: 30%) and implement (Score: 30%) new method for producing sequential group recommendations
 
-<!-- Jokin johdanto -->
+<!-- TODO: Jokin johdanto? -->
 
 #### **Satisfaction**
 
