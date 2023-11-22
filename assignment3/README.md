@@ -35,10 +35,16 @@ recommendations in each iteration.
     ```
 
 ### Design (Score: 30%) and implement (Score: 30%) new method for producing sequential group recommendations
+<!-- Ei varmaan tarvita? -->
+<!-- Group recommendations combine the recommendations of each user in a group into one aggregated list of recommendation. This is done with a chosen aggregation method (e.g. by averaging out individual predicted scores for a movie and then seeing how much the group likes it and if it should be recommended).
 
-Group recommendations combine the recommendations of each user in a group into one aggregated list of recommendation. This is done with a chosen aggregation method (e.g. by averaging out individual predicted scores for a movie and then seeing how much the group likes it and if it should be recommended).
+Sometimes a user (or group of users) may want more recommendations, which are calculated in the similar method as before but are not the same movies as recommended before. This process is known as *sequential recommendation*. For a set number of iterations, top-k movie recommendations are provided. Sequential group recommendations include the additional step of aggregating individual user recommendations. -->
 
-Sometimes a user (or group of users) may want more recommendations, which are calculated in the similar method as before but are not the same movies as recommended before. This process is known as *sequential recommendation*. For a set number of iterations, top-k movie recommendations are provided. Sequential group recommendations include the additional step of aggregating individual user recommendations.
+Our method is based on calculating $score_g(i, j)$ for all $i$ where $i$ is the movie number, $j$ is the iteration number which is $j=1$ at the start, and $g$ is the group. Then, this is iterated and $score_g(i, j+1)$ is calculated for all movies. Then $score_g(i, j+2)$, then $score_g(i, j+3)$ etc.
+
+When $score_g(i, j)$ is calculated for all movies $i$ for iteration $j$, the top 10 scores are selected and the movies are provided as recommendations.
+
+Then, the next iteration is performed, and the next recommendations are calculated. The next 10 recommendations are provided, but the movies that were recommended in the previous iterations are not included.
 
 #### **Satisfaction**
 
@@ -78,13 +84,13 @@ Common group recommendation aggregation methods include the average aggregation,
 In average aggregation all members are considered equals. So, the rating of an item for a group of users will be given be averaging the scores of an item across all group members. The movie $i$ group score is equal to the average of predicted ratings for all the group $g$ members, i.e.:
 
 $$
-score_g(i) = \frac{ \sum_{u \in g}{\hat{r_{ui}}} }{|g|}
+avg\_score_g(i) = \frac{ \sum_{u \in g}{\hat{r_{ui}}} }{|g|}
 $$
 
 where $r_{ui}$ is the predicted rating for user $u$ item $i$. The problem with this logic is that the outlier (someone with a really high or low score) will never be satisfied. This is  implemented in the `assignment3/assignment2.py/average_aggregate` function.
 
 In least misery aggregation can act as a veto for the rest of the group. In this case, the rating of an item for a group of users is computed as the minimum score assigned to that item in all group members recommendations. The movie $i$ group score is the smallest score any member of the group $g$ has given as a rating $r_{ui}$, i.e.:
-$$ score_g(i) = \min_{u \in g}{\hat{r_{ui}}} $$
+$$ least\_score_g(i) = \min_{u \in g}{\hat{r_{ui}}} $$
 As one might predict, the recommended movies are unlikely to ilicit strong reactions, either positive or negative. This is  implemented in the `assignment3/assignment2.py/least_misery_aggregate` function.
 
 #### **Sequential Hybrid Aggregation Model**
@@ -95,7 +101,11 @@ Like described, group recommendation aggregation methods include some issues. To
 
 In this method, the score from both the abovementioned methods are joined with a weighted combination. Thus the group $g$ rating $score$ for the movie $i$ on recommendation iteration $j$ is as follows:
 
-$$ score_g(i, j) = (1 - \alpha _j)*avg\_score_g(i, j) + \alpha _j * least\_score_g(i, j)
+$$
+score_g(i, j) = \begin{cases}
+  avg\_score_g(i), \text{if }j=1\\
+  (1 - \alpha _j)avg\_score_g(i) + \alpha _j  least\_score_g(i) , \text{if }j>1
+\end{cases}
 $$
 
 The weight of each aggregation method for iteration $j$ depends on the value of $\alpha _j \in [0,1]$. From this definition we see that when $\alpha _j$ is 0, the least misery score is completely ignored, and only the average aggregation score effects the hybrid recommendation score. In this case, the best options for the entire group as a whole are concidered, without giving any additional weight to the users. When $\alpha _j$ is 1, only the least misery score effects the result.
