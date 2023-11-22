@@ -119,6 +119,8 @@ The overall algorithm implementation for our proposed sequential hybrid aggregat
 
 ### Provide detailed explanations and clarifications about why the method you propose works well for the case of sequential group recommendations (Score: 25%)
 
+Some explanations have probably been explained above, but we will summarize the most important points here.
+
 Our method contains several key components that ensure that the method works well for sequential group recommendations.
 
 1. Group Aggregation Methods
