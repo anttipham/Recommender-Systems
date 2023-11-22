@@ -2,11 +2,16 @@
 
 ## Implementation Details and Assumptions
 
-Only the top 10 recommendations are used to calculate the $\alpha _j$ value
+- Only the top 10 recommendations are used to calculate the $\alpha _j$ value
 because normalized Kendall tau distances don't behave well for calculating
 a large number of distances for the whole data. Normalization for a
 large data returns a value that is often very close to 0, which makes
 it difficult to calculate the next recommendation.
+
+- Additionally all assumptions made in the implementation details for previous assigments apply, since their code is reused. This includes the following:
+  - The prediction function can give a rating over 5. This is not a mistake, but a property of the prediction formula adding and subtracting the biases (movie mean ratings) of the users.
+  - Movies that some users have already seen can still be recommended to the group if the aggregation methods deems them to be best matches. This is based on the idea that a group member is open to seeing a movie again if everyone else is satisfied with the recommendation, and they liked it.
+  - Aggregation methods (average and least misery) use either real or predicted ratings for movies when aggregating group recommendations. This is due to many gaps in the dataset (users have often only rated a few movies). Now we can still concider their preferences when performing the group aggregation.
 
 ## Running the script
 
@@ -15,6 +20,13 @@ it difficult to calculate the next recommendation.
   ```python
   python assignment3.py <path/to/ml-latest-small/ratings.csv>
   ```
+- We print all results to console output straight from `main`. To change anything around (user group members etc.), please see the following global variables in `assignment2.py`
+
+    ```python
+    N = 10
+    GROUP = [233, 9, 242]
+    SIMILARITY_TYPE = "pearson"
+    ```
 
 ### Design (Score: 30%) and implement (Score: 30%) new method for producing sequential group recommendations
 
