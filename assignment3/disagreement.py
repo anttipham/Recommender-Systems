@@ -1,6 +1,6 @@
 """
-DATA.ML.360 Recommender Systems - Assignment 2
-File includes logic related to (b) section of the assignment.
+DATA.ML.360 Recommender Systems
+File includes kendall tau calculations.
 
 Antti Pham, Sophie Tötterström
 """
@@ -36,29 +36,29 @@ def kendall_tau(movies1: list[int], movies2: list[int]) -> int:
     return tau
 
 
-# def kendall_tau_normalized(movies1: list[int], movies2: list[int]) -> float:
-#     """
-#     Calculate normalized Kendall tau distance for two groups of movies.
-#     Movies that are not in both groups are ignored.
+def kendall_tau_normalized(movies1: list[int], movies2: list[int]) -> float:
+    """
+    Calculate normalized Kendall tau distance for two groups of movies.
+    Movies that are not in both groups are ignored.
 
-#     Normalized Kendall tau distance is in the range [0, 1] where 0 means
-#     that the groups are identical and 1 means that the groups are completely
-#     different.
+    Normalized Kendall tau distance is in the range [0, 1] where 0 means
+    that the groups are identical and 1 means that the groups are completely
+    different.
 
-#     The function returns 1 if there are 1 or less common movies.
+    The function returns 1 if there are 1 or less common movies.
 
-#     Note: the function fails if there are duplicate movies in one list.
-#     """
-#     group1 = set(movies1)
-#     group2 = set(movies2)
+    Note: the function fails if there are duplicate movies in one list.
+    """
+    group1 = set(movies1)
+    group2 = set(movies2)
 
-#     common = group1 & group2
-#     n = len(common)
-#     if n <= 1:
-#         return 0
+    common = group1 & group2
+    n = len(common)
+    if n <= 1:
+        return 0
 
-#     max_kendall_tau_dist = n * (n - 1) / 2
-#     return kendall_tau(movies1, movies2) / max_kendall_tau_dist
+    max_kendall_tau_dist = n * (n - 1) / 2
+    return kendall_tau(movies1, movies2) / max_kendall_tau_dist
 
 
 def kendall_tau_disagreement(

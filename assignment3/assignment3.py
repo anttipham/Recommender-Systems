@@ -6,12 +6,11 @@ Main file for the assignment.
 Antti Pham, Sophie Tötterström
 """
 
-import kendall
-import assignment2 as asg2
-import assignment1 as asg1
-
+import disagreement as disag
 import pandas as pd
 
+import assignment1 as asg1
+import assignment2 as asg2
 
 N = 10
 # Two similar users, one dissimilar
@@ -43,7 +42,7 @@ def calc_satisfaction(group_recs: list[int], user_recs: list[int]) -> float:
     Returns:
         float: Satisfaction score.
     """
-    return 1 - kendall.kendall_tau_normalized(group_recs, user_recs)
+    return 1 - disag.kendall_tau_normalized(group_recs, user_recs)
 
 
 def next_alpha(satisfactions: list[float]) -> float:
@@ -68,7 +67,7 @@ def weighted_combination(
     alpha: float,
 ) -> list[tuple[int, float]]:
     """
-    Calculate the weighted combination of the group aggregated scores of least 
+    Calculate the weighted combination of the group aggregated scores of least
     misery and average methods, weighted appropriately with the alpha value.
 
     This is done following the sequential hybrid aggregation model presented in
@@ -118,15 +117,15 @@ def main():
 
     # Get recommendations for all group members and aggregate
     recs = get_movie_ratings_for_users(user_movie_df)
-    avg_group_recs = asg2.average_aggregate(user_movie_df, 
+    avg_group_recs = asg2.average_aggregate(user_movie_df,
                                             recs, return_only_pred=True)
-    least_misery_group_recs = asg2.least_misery_aggregate(user_movie_df, 
+    least_misery_group_recs = asg2.least_misery_aggregate(user_movie_df,
                                             recs, return_only_pred=True)
 
     # set alpha for first iteration to 0 so only consider average aggregation
     alphas = [0]
     for iteration in range(0, 3):
-        
+
         # Hybrid aggregation
         hybrid_group_recs = weighted_combination(avg_group_recs,
                                                  least_misery_group_recs,
@@ -145,6 +144,6 @@ def main():
             for user in GROUP
         ]
         alphas.append(next_alpha(satisfactions))
-    
+
 if __name__ == "__main__":
     main()
