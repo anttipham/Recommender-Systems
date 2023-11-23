@@ -123,7 +123,6 @@ def main():
 
     # set alpha for first iteration to 0 so only consider average aggregation
     alphas = [0.0]
-    already_recommended = set()
     for iteration in range(ITERATIONS):
         # Hybrid aggregation
         hybrid_group_recs = weighted_combination(
@@ -135,14 +134,10 @@ def main():
         print(f"\n## Iteration {iteration+1}, alpha={alphas[iteration]:.2} ##")
         print(f"Top-{N} Hybrid Recommendations for group {GROUP}")
 
-        printed = 0
-        for movie, rating in hybrid_group_recs:
-            if printed >= N:
-                break
-            if movie not in already_recommended:
-                print(f"Movie number: {movie},\tPredicted rating: {rating:.3}")
-                printed += 1
-                already_recommended.add(movie)
+        for movie, rating in hybrid_group_recs[:N]:
+            print(f"Movie number: {movie},\tPredicted rating: {rating:.3}")
+            del avg_group_recs[movie]
+            del least_misery_group_recs[movie]
 
         # Update alpha for future iterations
         satisfactions = [

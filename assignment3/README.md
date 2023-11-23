@@ -170,18 +170,18 @@ Movie number: 260,      Predicted rating: 3.59
 Movie number: 4963,     Predicted rating: 3.57
 Movie number: 2028,     Predicted rating: 3.54
 
-## Iteration 3, alpha=0.11 ##
+## Iteration 3, alpha=0.38 ##
 Top-10 Hybrid Recommendations for group [233, 9, 242]
-Movie number: 4306,     Predicted rating: 3.37
-Movie number: 32,       Predicted rating: 3.35
-Movie number: 3897,     Predicted rating: 3.33
-Movie number: 46578,    Predicted rating: 3.3
-Movie number: 377,      Predicted rating: 3.21
-Movie number: 1270,     Predicted rating: 3.2
-Movie number: 3578,     Predicted rating: 3.14
-Movie number: 4643,     Predicted rating: 3.11
-Movie number: 733,      Predicted rating: 3.09
-Movie number: 1193,     Predicted rating: 3.01
+Movie number: 3897,     Predicted rating: 3.58
+Movie number: 4306,     Predicted rating: 3.5
+Movie number: 46578,    Predicted rating: 3.49
+Movie number: 32,       Predicted rating: 3.46
+Movie number: 1270,     Predicted rating: 3.46
+Movie number: 377,      Predicted rating: 3.32
+Movie number: 1198,     Predicted rating: 3.23
+Movie number: 3578,     Predicted rating: 3.23
+Movie number: 733,      Predicted rating: 3.2
+Movie number: 1193,     Predicted rating: 3.13
 ```
 
 ### Prepare also a short presentation (about 5 slides) to show how your method works (Score: 10%)
