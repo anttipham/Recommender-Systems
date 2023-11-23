@@ -59,14 +59,14 @@ Adjustment is done by subtracting the normalized Kendall tau distance from 1.
 Thus, the satisfaction score is defined as:
 
 $$
-sat(R_u, R_G) = 1 - \frac{\tau(R_u, R_G)}{\frac{1}{2}n(n - 1)}
+sat(R_u, R_g) = 1 - \frac{\tau(R_u, R_g)}{\frac{1}{2}n(n - 1)}
 $$
 
 (This is similar to the satisfaction score in the course
 material (lecture 7, slide 12) where GroupListSatisfaction is divided by
 a normalizing value, UserListSatisfaction.)
 
-Note that $\tau(R_u, R_G)$ calculates distance of the *common items* in the
+Note that $\tau(R_u, R_g)$ calculates distance of the *common items* in the
 recommendation lists.
 
 Satisfaction value calculation is implemented in the `assignment3/assignment3.py/calc_satisfaction` function.
@@ -109,12 +109,12 @@ Weighted combination calculation is implemented in the `assignment3/assignment3.
 $\alpha _j$ needs to be a value which considers both aggregation method results in a reasonable way. We want it to change during each iteration, so that the suitability of some group recommendations are evaluated and then concidered in the next iteration. This should especially adapt so that a user who was dissapointed in the recommendations would be more satisfied in the following iteration. Now from course materials (Lecture 7, slide 18) we define that $\alpha _j$ is calculated using the satisfation scores defined above from the previous iteration $j-1$, following the equation
 
 $$
-\alpha _j = \max _{u \in g} sat(R_u, R_{G_{j-1}}) - \min _{u \in g} sat(R_u, R_{G_{j-1}}),
+\alpha _j = \max _{u \in g} sat(R_u, R_{g,j-1}) - \min _{u \in g} sat(R_u, R_{g,j-1}),
 $$
 
-where $g$ is the group of users $u$, the user's personal recommendations are $R_u$ and the group recommendations are $R_{G_i}$ in the iteration $i$.
+where $g$ is the group of users $u$, satisfaction $sat$ calculated with the user's personal recommendations $R_u$ and the group recommendations $R_{g,i}$ in the iteration $i$.
 
-The group recommendations $R_{G_i}$ are calculated from the top-10 movie recommendations that got the highest scores in the iteration $i$.
+The group recommendations $R_{g,i}$ are calculated from the top-10 movie recommendations that got the highest scores in the iteration $i$.
 
 This equation ensures that if all users were similarly happy with the recommendations, $\alpha _j$ will get values closer to 0, and promote average aggregation results. On the other hand, if someone was very dissapointed compared to someone else, the least misery aggregation result will have a higher weight in the following iteration since it tries to make sure no one is dissapointed.
 
