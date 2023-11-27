@@ -19,7 +19,7 @@ recommendations in each iteration.
 
 ## Running the script
 
-- User needs to provide path to the MovieLens 100K ratings dataset when calling the script. Usage:
+- User needs to provide path to the MovieLens 100K ratings dataset when calling the script. Call the script inside the `assignment3` directory. Usage:
 
   ```python
   python assignment3.py <path/to/ml-latest-small/ratings.csv>
@@ -78,13 +78,13 @@ Group recommendations combine the recommendations of each user in a group into o
 In average aggregation all members are considered equals. So, the rating of an item for a group of users will be given be averaging the scores of an item across all group members. The movie $i$ group score is equal to the average of predicted ratings for all the group $g$ members, i.e.:
 
 $$
-avg\_score_g(i) = \frac{ \sum_{u \in g}{\hat{r_{ui}}} }{|g|}
+avg\_score_g(i) = \frac{ \sum_{u \in g}{\hat{r_{u,i}}} }{|g|}
 $$
 
-where $r_{ui}$ is the predicted rating for user $u$ item $i$. The problem with this logic is that the outlier (someone with a really high or low score) will never be satisfied. This is  implemented in the `assignment3/assignment2.py/average_aggregate` function.
+where $r_{u,i}$ is the predicted rating for user $u$ item $i$. The problem with this logic is that the outlier (someone with a really high or low score) will never be satisfied. This is  implemented in the `assignment3/assignment2.py/average_aggregate` function.
 
 In least misery aggregation can act as a veto for the rest of the group. In this case, the rating of an item for a group of users is computed as the minimum score assigned to that item in all group members recommendations. The movie $i$ group score is the smallest score any member of the group $g$ has given as a rating $r_{ui}$, i.e.:
-$$ least\_score_g(i) = \min_{u \in g}{\hat{r_{ui}}} $$
+$$ least\_score_g(i) = \min_{u \in g}{\hat{r_{u,i}}} $$
 As one might predict, the recommended movies are unlikely to ilicit strong reactions, either positive or negative. This is  implemented in the `assignment3/assignment2.py/least_misery_aggregate` function.
 
 #### **Sequential Hybrid Aggregation Model**
@@ -186,4 +186,4 @@ Movie number: 1193,     Predicted rating: 3.13
 
 ### Prepare also a short presentation (about 5 slides) to show how your method works (Score: 10%)
 
-This presentation can be found in our repository `assignment3/asg3_presentation.pdf`.
+This presentation can be found in our repository `assignment3/asg3_presentation.pdf`/`assignment3/asg3_presentation.pdf`.
