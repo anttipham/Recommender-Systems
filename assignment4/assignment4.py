@@ -93,19 +93,19 @@ def preprocess(
 
 ## why-not logic
 def atomic_granularity_case(
-    movies: dict[int, Movie], top10_movies: list[Movie], movie_id: int
+    movies: dict[int, Movie], top10_movies: list[int], movie_id: int
 ) -> list[str]:
     pass
 
 
 def group_granularity_case(
-    movies: dict[int, Movie], top10_movies: list[Movie], movie_id: int
+    movies: dict[int, Movie], top10_movies: list[int], genre: int
 ) -> list[str]:
     pass
 
 
 def position_absenteeism(
-    movies: dict[int, Movie], top10_movies: list[Movie], movie_id: int
+    movies: dict[int, Movie], top10_movies: list[int], movie_id: int
 ) -> list[str]:
     pass
 
