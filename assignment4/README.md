@@ -1,4 +1,4 @@
-# Assignment 3: Sequential Recommendations
+# Assignment 4: Explanations for Why-not Questions
 
 ## Implementation Details and Assumptions
 
