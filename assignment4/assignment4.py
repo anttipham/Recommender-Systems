@@ -6,7 +6,9 @@ Antti Pham, Sophie Tötterström
 """
 
 import os
+import sys
 import argparse
+from collections import Counter
 
 import pandas as pd
 
@@ -16,21 +18,7 @@ import assignment3 as asg3
 
 N = 10
 GROUP = [233, 9, 242]
- 
 
-def parse_args():
-    """
-    Handle command-line args
-    """
-    parser = argparse.ArgumentParser(
-        description="Script for recommender system for MovieLens Dataset"
-    )
-    parser.add_argument(
-        "--path",
-        help="Path to the ml-latest-small directory",
-    )
-    args = parser.parse_args()
-    return args
 
 
 def read_movielens(dir_path):
@@ -69,13 +57,13 @@ def process_movie_genre_data(movies_genre_df: pd.DataFrame) -> dict[int, Movie]:
         movie_obj = Movie(
             movie_id, 
             row_data["title"],
-            row_data["genres"].split('|')
+            row_data["genres"].lower().split('|')
         )
         movies[movie_id] = movie_obj
     return movies
 
 
-def preprocess(
+def update_movies(
     movies: dict[int, Movie],
     recs: dict[int, list[tuple[int, float]]],
     avg_group_recs: list[tuple[int, float]]
@@ -87,9 +75,93 @@ def preprocess(
             movies[movie_id].user_ratings[user_id] = rating
     
     # process average aggregated recommendations
-    n = 0
     for movie_id, avg_rating in avg_group_recs:
         movies[movie_id].avg_rating = avg_rating
+
+
+def parse_args():
+    """
+    Handle command-line args
+    """
+
+    parser = argparse.ArgumentParser(
+        description=f"Script for recommender system for MovieLens Dataset. \n \
+            User specific recommendations made with user-collaborative filtering, \
+            and Top-{N} average aggregated for the group. \n \
+            Runs a CLI to ask why-not questions regarding the recomendations."
+    )
+
+    # always require a positional path argument
+    parser.add_argument(
+        "path",
+        help="Path to the local ml-latest-small directory.",
+        type=str
+    )
+
+    # always require the question type (1 of the 2 options)
+    parser.add_argument(
+        "-wnt",
+        "--why_not_type", 
+        choices=["granularity", "position_absenteeism"],
+        help="Pick one of the two why-not question types.",
+        type=str,
+        required=True
+    )
+
+    # Determine the requirement of each argument dependent on question type
+    gran_q = "granularity" in sys.argv
+    atomic_q = "-mg" in sys.argv or "--movie_id_gran" in sys.argv
+    group_q = "-g" in sys.argv or "--genre" in sys.argv
+
+    if group_q and atomic_q:
+        raise ValueError("Cannot have both -g and -mg arguments.")
+    elif gran_q and not atomic_q and not group_q:
+        raise ValueError("Must have either -g or -mg argument.")
+
+    granularity_group = parser.add_argument_group("Group Granularity Options")
+    granularity_group.add_argument(
+        "-mg",
+        "--movie_id_gran",
+        help="Movie ID for atomic group granularity",
+        type=int,
+        required=gran_q and atomic_q
+    )
+    granularity_group.add_argument(
+        "-g",
+        "--genre",
+        help="Genre for group granularity (required for group)",
+        type=str,
+        required=gran_q and group_q
+    )
+
+    pos_abs_group = parser.add_argument_group("Position Absenteeism Options")
+    pos_abs_group.add_argument(
+        "-ma",
+        "--movie_id_abs",
+        help="Movie ID for position absenteeism",
+        type=int,
+        required="position_absenteeism" in sys.argv
+    )
+
+    args = parser.parse_args()
+    return args
+
+
+def call_funcs(args, movies, top10_movies):
+
+    explanations = [] # TODO change to set if explanations may be repeated
+    if args.why_not_type == "granularity":
+        if args.movie_id_gran is not None:
+            print("Your why-not question is an atomic granularity question.")
+            pass
+        elif args.genre is not None:
+            print("Your why-not question is a group granularity question.")
+            explanations.extend(group_granularity_case(movies, top10_movies, args.genre))
+
+    elif args.why_not_type == "position_absenteeism":
+        print("Your why-not question is a position absenteeism question.")
+
+    return explanations
 
 ## why-not logic
 def atomic_granularity_case(
@@ -99,10 +171,9 @@ def atomic_granularity_case(
 
 
 def group_granularity_case(
-    movies: dict[int, Movie], top10_movies: list[int], genre: int
+    movies: dict[int, Movie], top10_movies: list[int], genre: str
 ) -> list[str]:
     pass
-
 
 def position_absenteeism(
     movies: dict[int, Movie], top10_movies: list[int], movie_id: int
@@ -123,11 +194,14 @@ def main():
     # list of tuples (movie_id, avg_rating)
     avg_group_recs: list[tuple[int, float]] = asg2.average_aggregate(user_movie_df, recs)
 
-    preprocess(movies, recs, avg_group_recs)
+    # add remaining data to the movie objects
+    update_movies(movies, recs, avg_group_recs)
 
-    top10_movies: list[int] = asg2.nth_elements(avg_group_recs[:N], 1)
-    print(top10_movies)
+    # get top-10 movies (ids used to fetch objects from movies dict)
+    top10_movies: list[int] = asg2.nth_elements(avg_group_recs[:N-1], 1)
     
+    explanations = call_funcs(args, movies, top10_movies)
+    [print(exp) for exp in explanations]
 
 
 if __name__ == "__main__":
