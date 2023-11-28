@@ -121,7 +121,7 @@ def least_misery_aggregate(
     user_movie_df: pd.DataFrame,
     users_recs: dict[int, list[tuple[int, float]]],
     return_only_pred: bool = False,
-) -> [list[tuple[int, float]], dict[int, float]]:
+) -> Union[list[tuple[int, float]], dict[int, float]]:
     """
     Perform least misery aggregation on recommendations for a group of users
 

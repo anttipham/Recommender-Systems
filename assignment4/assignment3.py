@@ -5,14 +5,17 @@ Main file for the assignment.
 Antti Pham, Sophie Tötterström
 """
 
-import disagreement as disag
 import pandas as pd
 
+import disagreement as disag
 import assignment1 as asg1
 import assignment2 as asg2
 
-N = 10
-GROUP = [233, 9, 242]
+
+from assignment4 import GROUP, N
+
+# N = 10
+# GROUP = [233, 9, 242]
 # GROUP = [233, 423, 242]
 SIMILARITY_TYPE = "pearson"
 ITERATIONS = 3
@@ -110,6 +113,7 @@ def get_movie_ratings_for_users(
     return recs
 
 
+""" 
 def main():
     # Read data
     user_movie_df = asg1.read_movielens(ratings_file_path=asg1.parse_args())
@@ -149,3 +153,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+ """
+ 
