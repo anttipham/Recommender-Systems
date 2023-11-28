@@ -6,8 +6,8 @@
 
 ## Design (Score: 40%) and implement (Score: 40%) methods for producing explanations for group recommendations for the granularity case
 
-1. Atomic: Why not Matrix?
-2. Group: Why not action movies?
+1. Atomic total absenteeism: Why not Matrix?
+2. Group total absenteeism: Why not action movies?
 3. Atomic position absenteeism: Why not rank Matrix first?
 4. Group position absenteeism: Why not rank action movies first?
 
