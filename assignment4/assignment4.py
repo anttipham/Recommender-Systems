@@ -85,10 +85,15 @@ def parse_args():
     """
 
     parser = argparse.ArgumentParser(
-        description=f"Script for recommender system for MovieLens Dataset. \n \
-            User specific recommendations made with user-collaborative filtering, \
-            and Top-{N} average aggregated for the group. \n \
-            Runs a CLI to ask why-not questions regarding the recomendations."
+        description=f"""
+            Runs CLI to ask why-not questions regarding the recomendations.\n
+            User specific recommendations made with user-collaborative filtering,
+            and average aggregated to provide top-{N} for the group.
+            Group is set as a global variable in the script ({GROUP}).\n
+            Example Question: Why not more comedy movies?
+            Usage: python assignment4.py ../ml-latest-small/ -wnt granularity -g comedy
+            """,
+            formatter_class=argparse.RawTextHelpFormatter
     )
 
     # always require a positional path argument
@@ -197,6 +202,7 @@ def main():
 
     # Read data
     args = parse_args()
+
     user_movie_df, movies_genre_df = read_movielens(dir_path=args.path)
     movies: dict[int, Movie] = process_movie_genre_data(movies_genre_df)
 
