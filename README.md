@@ -11,3 +11,7 @@ The assignment 2 is located in the [assignment2](assignment2) directory.
 ## Assignment 3 - Sequential Recommendations
 
 The assignment 3 is located in the [assignment3](assignment3) directory.
+
+## Assignment 4 - Explanations for Why-not Questions
+
+The assignment 4 is located in the [assignment4](assignment4) directory.
