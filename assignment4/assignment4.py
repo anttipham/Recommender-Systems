@@ -173,7 +173,19 @@ def atomic_granularity_case(
 def group_granularity_case(
     movies: dict[int, Movie], top10_movies: list[int], genre: str
 ) -> list[str]:
-    pass
+    
+    # antti: example using Counter
+    # find genres of top-10 movies
+    top10_genres = Counter()
+    for movie_id in top10_movies:
+        top10_genres.update(set(movies[movie_id].genres))
+
+    # potential answers to "why not more {genre} movies?"
+    answers = []
+    answers.append(f"Only {top10_genres[genre]}/{top10_genres.total()} of the Top-{N} movies are {genre} movies.")
+    answers.append(f"The group prefers {top10_genres.most_common(1)[0][0]} movies.")
+
+    return answers
 
 def position_absenteeism(
     movies: dict[int, Movie], top10_movies: list[int], movie_id: int
