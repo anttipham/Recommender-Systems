@@ -24,14 +24,15 @@ GROUP = [233, 9, 242]
 def atomic_granularity_case(
     movies: dict[int, Movie], top10_movies: list[int], movie_id: int
 ) -> list[str]:
+    # TODO antti
     pass
 
 
 def group_granularity_case(
     movies: dict[int, Movie], top10_movies: list[int], genre: str
 ) -> list[str]:
+    # TODO sophie
     
-    # antti: example using Counter
     # find genres of top-10 movies
     top10_genres = Counter()
     for movie_id in top10_movies:
@@ -48,13 +49,14 @@ def group_granularity_case(
 def position_absenteeism(
     movies: dict[int, Movie], top10_movies: list[int], movie_id: int
 ) -> list[str]:
+    # TODO antti
     pass
 
 
 ## Data Processing
 def parse_args():
     """
-    Handle command-line args
+    Handle command-line args.
     """
 
     parser = argparse.ArgumentParser(
@@ -63,8 +65,6 @@ def parse_args():
             User specific recommendations made with user-collaborative filtering,
             and average aggregated to provide top-{N} for the group.
             Group is set as a global variable in the script ({GROUP}).\n
-            Example Question: Why not more comedy movies?
-            Usage: python assignment4.py ../ml-latest-small/ -wnt granularity -g comedy
             """,
             formatter_class=argparse.RawTextHelpFormatter
     )
@@ -80,21 +80,24 @@ def parse_args():
     return args
 
 
-def read_movielens(dir_path):
+def read_movielens(dir_path: str) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
-    Read the MovieLens data from ratings_file_path
+    Read the MovieLens data from the given directory path.
+
+    Args:
+        dir_path (str): path to ml-latest-small directory
+
+    Returns:
+        pd.DataFrame: user-movie ratings dataframe (ratings.csv)
+        pd.DataFrame]: movie-genre dataframe (movies.csv)
     """
 
-    ## Read ratings data
-    # create new dataframe where
-    # userIds become the rows aka index
-    # movieIds become the columns
-    # ratings for each movie are placed in the cells accordingly
+    # Read ratings data
     ratings_file_path = os.path.join(dir_path, "ratings.csv")
     ratings = pd.read_csv(ratings_file_path)
     user_movie_df = ratings.pivot(index="userId", columns="movieId", values="rating")
 
-    ## Read movies data
+    # Read movies genre data
     movies_file_path = os.path.join(dir_path, "movies.csv")
     movies_genre_df = pd.read_csv(movies_file_path, index_col="movieId")
 
@@ -127,6 +130,15 @@ def update_movies(
     recs: dict[int, list[tuple[int, float]]],
     avg_group_recs: list[tuple[int, float]]
 ):
+    """
+    Loops over all movie objects, and updates them with the 
+    user specific ratings and average group rating.
+
+    Args:
+        movies (dict[int, Movie]): all pairs of movie_id, Movie object
+        recs (dict[int, list[tuple[int, float]]]): user_id, user specific recs
+        avg_group_recs (list[tuple[int, float]]): average aggregated group recs
+    """
 
     # process user specific recommendations
     for user_id, user_recs in recs.items():
