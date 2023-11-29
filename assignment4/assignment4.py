@@ -171,26 +171,15 @@ def main():
     # Fetch all movie objects with related info, as well as top-10 movie_ids
     movies, top10_movies = read_data()
 
-    # NOTE älä muuta/siirrä tätä! tämä on tilapäistä! lupaan
-    #q_type = "position_absenteeism"
-    #movie_id = 1
-    #genre = None
-
-    q_type = "granularity"
-    movie_id = None
+    movie_id = 1
     genre = "action"
 
-    explanations = []
-    if q_type == "granularity":
-        if movie_id:
-            pass
-        elif genre:
-            explanations.extend(group_granularity_case(movies, top10_movies, genre))
-    elif q_type == "position_absenteeism":
-        pass
+    # 1st queston: atomic granularity case
 
-    for exp in explanations:
-        print(exp)
+    # 2nd question: group granularity case
+    [print(exp) for exp in group_granularity_case(movies, top10_movies, genre)]
+
+    # 3rd question: position absenteeism case
 
 
 if __name__ == "__main__":

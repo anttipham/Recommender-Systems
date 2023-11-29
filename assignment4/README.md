@@ -11,6 +11,7 @@
 3. Position absenteeism: Why not rank Matrix first?
 
 Examples answers for Atomic granularity case:
+<!-- vähän niinkuin vain individual -->
 
 - An item does not exist in the database of the system.
   - "Matrix does not exist in the database."
@@ -27,15 +28,15 @@ Examples answers for Atomic granularity case:
     - User 2: 2.0
 - None of the group has rated this item
 - User x has no recommendations for this item
-
 - Movie A is not suitable for the group.
 
 Examples answers for Group granularity case:
+<!-- vähän niinkuin vain group -->
 
 - An item does not exist in the database of the system.
   - "Action does not exist in the database."
-<!-- - Number of returned top-k items.
-  - "You asked for few items." -->
+- Number of returned top-k items.
+  - "You asked for few items."
 - The tie-breaking method
   - "Action had the same score as comedy"
 
@@ -47,11 +48,12 @@ Examples answers for Group granularity case:
 - Only x group members like comedies.
 
 Examples answers for Position absenteeism
+<!-- käytännössä molemmat -->
 
 - An item does not exist in the database of the system.
   - "Matrix does not exist in the database."
-- Number of returned top-k items.
-  - "You asked for few items."
+<!-- - Number of returned top-k items.
+  - "You asked for few items." -->
 - The tie-breaking method
   - "Matrix had the same score as Iron Man"
 
@@ -61,10 +63,10 @@ Examples answers for Position absenteeism
   - Dislike
     - User 1: 3.5
     - User 2: 2.0
-- None of the group has rated this item
-- User x has no recommendations for this item
+<!-- - None of the group has rated this item -->
+<!-- - The group has no recommendations for this item -->
 
-- Movie A is not suitable for the group.
+- Movie A is not suitable enough for the group.
 - "Your group prefers \[most common genre\] movies"
 - "Your group dislikes action movies"
 - None of group members has rated a comedy.
