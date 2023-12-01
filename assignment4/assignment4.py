@@ -53,13 +53,6 @@ def atomic_granularity_case(
 
     # Generate explanations.
     explanations: list[str] = []
-    # - User x has no recommendations for this item
-    for user_id, user_score in movie.user_ratings.items():
-        if user_score == 0:
-            explanations.append(
-                f"User {user_id} has not rated the movie {movie.title}. "
-                f"This substantially decreases the score for {movie.title}."
-            )
     # - x peers like A, but y dislike it
     #   - Like
     #     - User 1: 5.0
@@ -78,8 +71,11 @@ def atomic_granularity_case(
             )
             continue
         if user_score == 0:
-            # Handled in the above case:
-            # "User x has no recommendations for this item"
+            # - User x has no recommendations for this item
+            explanations.append(
+                f"User {user_id} has not rated the movie {movie.title}. "
+                f"This substantially decreases the score for {movie.title}."
+            )
             continue
         explanations.append(
             f"User {user_id} hadn't given a high enough rating for "
