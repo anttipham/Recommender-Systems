@@ -3,11 +3,7 @@ class Movie:
     Class describing a movie object of MovieLens dataset
     """
 
-    def __init__(
-        self, movie_id: int, 
-        title: str, 
-        genres: list[str]
-    ):
+    def __init__(self, movie_id: int, title: str, genres: list[str]):
         """
         Args:
             movie_id (int): movie id
@@ -25,7 +21,7 @@ class Movie:
 
         # the average aggregated group ratings for this movie
         self.avg_rating: float = None
-    
+
     def __str__(self):
         """
         String method for printing information about the movie object.

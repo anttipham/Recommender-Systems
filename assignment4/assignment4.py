@@ -5,15 +5,15 @@ Main file for the assignment.
 Antti Pham, Sophie Tötterström
 """
 
+import argparse
 import os
 import sys
-import argparse
 from collections import Counter
 
 import pandas as pd
+from movie import Movie
 from tabulate import tabulate
 
-from movie import Movie
 import assignment2 as asg2
 import assignment3 as asg3
 
@@ -32,7 +32,6 @@ def atomic_granularity_case(
 def group_granularity_case(
     movies: dict[int, Movie], movie_recs: list[int], genre: str
 ) -> list[str]:
-
     # NOTE only movies with avg_rating >= 3 are valid recommendations
     # for the explanations for the why-not questions.
     # other movies are considered to not be recommendations at all
@@ -56,7 +55,7 @@ def group_granularity_case(
 
     if not genre in movies_by_genre.keys():
         return [f"There are no {genre} movies in the database."]
-    
+
     # movies of this genre are recommended, but not in top-N
     if len(movies_by_genre[genre]) > N:
         answers.append(f"You asked for only {N} items.")
@@ -66,30 +65,38 @@ def group_granularity_case(
     # calculate average score for each genre
     genre_averages = {}
     for gen, movie_id_list in movies_by_genre.items():
-        genre_averages[gen] = sum(movies[id].avg_rating for id in movie_id_list) / len(movie_id_list)
-    
+        genre_averages[gen] = sum(movies[id].avg_rating for id in movie_id_list) / len(
+            movie_id_list
+        )
+
     worst_genre = min(genre_averages, key=genre_averages.get)
     if worst_genre == genre:
         answers.append(f"The group dislikes {genre} movies.")
-    
+
     best_genre = max(genre_averages, key=genre_averages.get)
     if best_genre != genre:
         answers.append(f"The group prefers {best_genre} movies.")
-        answers.append(f"{best_genre} movies scored the highest on average ({genre_averages[best_genre]:.2f}), while {genre} movies scored {genre_averages[genre]:.2f}.")
-    
+        answers.append(
+            f"{best_genre} movies scored the highest on average "
+            f"({genre_averages[best_genre]:.2f}), while {genre} movies "
+            f"scored {genre_averages[genre]:.2f}."
+        )
+
     # goes down to individual movies
     top10_movies = movie_recs[:N]
 
-    #top10_not_in_genre = set(top10_movies) - (movies_by_genre[genre])
+    # top10_not_in_genre = set(top10_movies) - (movies_by_genre[genre])
 
     genre_not_in_top10 = set(movies_by_genre[genre]) - set(top10_movies)
     # TODO compile these results ??
     for id in genre_not_in_top10:
         atomic_granularity_case(movies, top10_movies, id)
-    
-    answers.append(f"{len(genre_not_in_top10)} {genre} movies were rated lower by similar users compared to the recommended top-{N} movies.")
 
-    
+    answers.append(
+        f"{len(genre_not_in_top10)} {genre} movies were rated lower by "
+        f"similar users compared to the recommended top-{N} movies."
+    )
+
     """ Irrelevant?
     # find genres of top-10 movies
     top10_movies = movie_recs[:N]
@@ -125,14 +132,12 @@ def parse_args():
             and average aggregated to provide top-{N} for the group.
             Group is set as a global variable in the script ({GROUP}).\n
             """,
-            formatter_class=argparse.RawTextHelpFormatter
+        formatter_class=argparse.RawTextHelpFormatter,
     )
 
     # always require a positional path argument
     parser.add_argument(
-        "path",
-        help="Path to the local ml-latest-small directory.",
-        type=str
+        "path", help="Path to the local ml-latest-small directory.", type=str
     )
 
     args = parser.parse_args()
@@ -164,7 +169,8 @@ def read_movielens(dir_path: str) -> pd.DataFrame and pd.DataFrame:
 
 
 def process_movie_genre_data(movies_genre_df: pd.DataFrame) -> dict[int, Movie]:
-    """ Processes movie genre data into more appropriate data structure
+    """
+    Processes movie genre data into more appropriate data structure
 
     Args:
         movies_genre_df (pd.DataFrame): movie-genre dataframe from movies.csv
@@ -176,9 +182,7 @@ def process_movie_genre_data(movies_genre_df: pd.DataFrame) -> dict[int, Movie]:
     movies: dict[int, Movie] = {}
     for movie_id, row_data in movies_genre_df.iterrows():
         movie_obj = Movie(
-            movie_id, 
-            row_data["title"],
-            row_data["genres"].lower().split('|')
+            movie_id, row_data["title"], row_data["genres"].lower().split("|")
         )
         movies[movie_id] = movie_obj
     return movies
@@ -187,10 +191,10 @@ def process_movie_genre_data(movies_genre_df: pd.DataFrame) -> dict[int, Movie]:
 def update_movies(
     movies: dict[int, Movie],
     recs: dict[int, list[tuple[int, float]]],
-    avg_group_recs: list[tuple[int, float]]
+    avg_group_recs: list[tuple[int, float]],
 ):
     """
-    Loops over all movie objects, and updates them with the 
+    Loops over all movie objects, and updates them with the
     user specific ratings and average group rating.
 
     Args:
@@ -203,7 +207,7 @@ def update_movies(
     for user_id, user_recs in recs.items():
         for movie_id, rating in user_recs:
             movies[movie_id].user_ratings[user_id] = rating
-    
+
     # process average aggregated recommendations
     for movie_id, avg_rating in avg_group_recs:
         movies[movie_id].avg_rating = avg_rating
@@ -223,10 +227,14 @@ def read_data() -> dict[int, Movie] and list[int]:
     movies: dict[int, Movie] = process_movie_genre_data(movies_genre_df)
 
     # user_id, list of tuples (movie_id, rating)
-    recs: dict[int, list[tuple[int, float]]] = asg3.get_movie_ratings_for_users(user_movie_df)
+    recs: dict[int, list[tuple[int, float]]] = asg3.get_movie_ratings_for_users(
+        user_movie_df
+    )
 
     # list of tuples (movie_id, avg_rating)
-    avg_group_recs: list[tuple[int, float]] = asg2.average_aggregate(user_movie_df, recs)
+    avg_group_recs: list[tuple[int, float]] = asg2.average_aggregate(
+        user_movie_df, recs
+    )
 
     # update movie objects with the most current data
     update_movies(movies, recs, avg_group_recs)
@@ -236,17 +244,20 @@ def read_data() -> dict[int, Movie] and list[int]:
 
     return movies, movie_recs
 
+
 def pretty_print_recs(movies: dict[int, Movie], movie_recs: list[int]):
     headers = ["Rank", "Movie ID", "Title", "Average Rating"]
     table_data = []
     for idx, movie_id in enumerate(movie_recs[:N]):
         mov_obj = movies[movie_id]
-        table_data.append([idx+1, movie_id, mov_obj.title, f"{mov_obj.avg_rating:.2f}"])
+        table_data.append(
+            [idx + 1, movie_id, mov_obj.title, f"{mov_obj.avg_rating:.2f}"]
+        )
     table = tabulate(table_data, headers=headers)
     print(table)
 
+
 def main():
-    
     # Fetch all movie objects with related info, as well as top-10 movie_ids
     movies, movie_recs = read_data()
 
@@ -263,7 +274,7 @@ def main():
     # 2nd question: group granularity case
     print(f"Why not more {genre} movies?\n")
     for idx, exp in enumerate(group_granularity_case(movies, movie_recs, genre)):
-        print(f"{idx+1}. {exp}") 
+        print(f"{idx+1}. {exp}")
 
     # 3rd question: position absenteeism case
     print()
