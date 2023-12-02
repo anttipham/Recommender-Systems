@@ -8,7 +8,7 @@ Antti Pham, Sophie Tötterström
 import argparse
 import os
 from collections import Counter
-from math import isclose
+import math
 
 import pandas as pd
 from movie import Movie
@@ -86,15 +86,18 @@ def atomic_granularity_case(
     # - Number of returned top-k items.
     movie_index = movie_recs.index(movie_id)
     if movie_index < 100:
+        # Ceiling to nearest 10
+        top_k = math.ceil((movie_index + 1) / 10) * 10
         explanations.append(
             f"The movie rank for {movie.title} is {movie_index+1} in the "
             "recommendations. You asked for only top 10 movies. You could "
-            "consider increasing the number of recommendations."
+            f"consider asking top-{top_k} to get the movie in the "
+            "recommendations."
         )
     # - The tie-breaking method
     # Float equality check has to be done with isclose() because of
     # floating point arithmetic.
-    is_tie = isclose(movie.avg_rating, last_movie.avg_rating)
+    is_tie = math.isclose(movie.avg_rating, last_movie.avg_rating)
     if is_tie:
         explanations.append(
             f"The movie {movie.title} has the same score as the last movie "
@@ -107,7 +110,8 @@ def atomic_granularity_case(
         explanations.append(
             f"It is possible that the movie {movie.title} is simply not "
             "suitable for the group. The movie has received "
-            f"a rating of {movie.avg_rating:.2f} on average."
+            f"a rating of {movie.avg_rating:.2f} on average. "
+            "The other movies could be more suitable for the group."
         )
     return explanations
 
@@ -198,8 +202,100 @@ def group_granularity_case(
 def position_absenteeism(
     movies: dict[int, Movie], movie_recs: list[int], movie_id: int
 ) -> list[str]:
-    # TODO antti
-    pass
+    """
+    Generates explanations for the position absenteeism case.
+
+    Args:
+        movies (dict[int, Movie]): Movie dictionary where key is movie_id and
+            value is Movie object.
+        movie_recs (list[int]): List of movie_ids in order of recommendation.
+        movie_id (int): Movie id of the movie to generate explanations for.
+
+    Returns:
+        list[str]: List of explanations.
+    """
+    # Error checking.
+    # - An item does not exist in the database of the system.
+    if movie_id not in movie_recs:
+        return ["The movie does not exist in the database."]
+    movie = movies[movie_id]
+    # - Item is not in the recommendations.
+    if movie_id not in movie_recs[:N]:
+        return [
+            f"Can't answer why the movie {movie.title} isn't higher "
+            "in the recommendations because the movie is not in the "
+            "recommendations. Use the atomic granularity case instead."
+        ]
+    # Item is already the highest in the recommendations.
+    if movie_id == movie_recs[0]:
+        return [
+            f"The movie {movie.title} is already the highest in the recommendations."
+        ]
+    # - None of the group has rated this item
+    if movie.avg_rating == 0:
+        return [f"None of the group members have rated the movie {movie.title}."]
+
+    # Generate explanations.
+    explanations: list[str] = []
+    # - x peers like A, but y dislike it
+    #   - Like
+    #     - User 1: 5.0
+    #   - Dislike
+    #     - User 1: 3.5
+    #     - User 2: 2.0
+    first_movie = movies[movie_recs[0]]
+    for user_id, user_score in sorted(movie.user_ratings.items(), key=lambda x: x[1]):
+        if user_score == 5.0:
+            continue
+        if user_score >= first_movie.avg_rating:
+            explanations.append(
+                f"User {user_id} has given a high rating of {user_score:.2f} "
+                f"for the movie {movie.title}, but they could have given an "
+                "even higher rating to get the movie in the recommendations."
+            )
+            continue
+        if user_score == 0:
+            # - User x has no recommendations for this item
+            explanations.append(
+                f"User {user_id} has not rated the movie {movie.title}. "
+                f"This substantially decreases the score for {movie.title}."
+            )
+            continue
+        explanations.append(
+            f"User {user_id} hadn't given a high enough rating for "
+            f"the movie {movie.title}. "
+            f"They gave a rating of {user_score:.2f} which is lower than "
+            f"the first movie in the recommendations."
+        )
+    # - The tie-breaking method
+    # Float equality check has to be done with isclose() because of
+    # floating point arithmetic.
+    movie_index = movie_recs.index(movie_id)
+    for movie_recs_id in movie_recs[:movie_index]:
+        rec_movie = movies[movie_recs_id]
+        is_tie = math.isclose(movie.avg_rating, rec_movie.avg_rating)
+        if is_tie:
+            explanations.append(
+                f"The movie {movie.title} has the same score as the movie "
+                f"{rec_movie.title} in the recommendations. "
+                "The movie was not higher in the recommendations because "
+                "the order is not defined for movies with the same score."
+            )
+    # - Movie A is not suitable for the group.
+    if not is_tie:
+        explanations.append(
+            f"It is possible that the movie {movie.title} is simply not "
+            "suitable enough to be higher on the recommendations for the "
+            "group. The movie has received "
+            f"a rating of {movie.avg_rating:.2f} on average. "
+            "The other movies could be more suitable for the group."
+        )
+    # -----------------------------------------------------------------------
+    # TODO: group granularity case
+    # - "Your group prefers \[most common genre\] movies"
+    # - "Your group dislikes action movies"
+    # - "Only 1 action movie is in the group top-10 recommendations"
+    # - Only x group members like comedies.
 
 
 ## Data Processing
@@ -368,7 +464,7 @@ def main():
     movie_id = find_movie_id(movies, MOVIE)
 
     # 1st queston: atomic granularity case
-    print(f"Why wasn't movie {MOVIE} in the recommendation?\n")
+    print(f"Why wasn't movie {MOVIE} in the recommendation?")
     explanations1 = atomic_granularity_case(movies, movie_recs, movie_id)
     for i, explanation in enumerate(explanations1):
         print(f"{i+1}. {explanation}")
@@ -381,6 +477,10 @@ def main():
     print()
 
     # 3rd question: position absenteeism case
+    print(f"Why not rank {MOVIE} first?")
+    explanations3 = position_absenteeism(movies, movie_recs, movie_id)
+    for i, explanation in enumerate(explanations3):
+        print(f"{i+1}. {explanation}")
     print()
 
 

@@ -6,32 +6,31 @@
 
 ## Design (Score: 40%) and implement (Score: 40%) methods for producing explanations for group recommendations for the granularity case
 
-1. Atomic granularity case: Why not Matrix?
-2. Group granularity case: Why not action movies?
-3. Position absenteeism: Why not rank Matrix first?
-
-Examples answers for Atomic granularity case:
+### 1. Atomic granularity case: Why not Matrix?
 <!-- vähän niinkuin vain individual -->
 
-- An item does not exist in the database of the system.
-  - "Matrix does not exist in the database."
-- Number of returned top-k items.
-  - "You asked for few items."
-- The tie-breaking method
-  - "Matrix had the same score as Iron Man"
+We use this explanation engine for movies that are not in the group recommendations.
 
-- x peers like A, but y dislike it
-  - Like
-    - User 1: 5.0
-  - Dislike
-    - User 1: 3.5
-    - User 2: 2.0
-- None of the group has rated this item
-- User x has no recommendations for this item
-- Movie A is not suitable for the group.
+Examples answers for Atomic granularity case:
+
+- Error checking
+  - "The movie does not exist in the database."
+  - "The movie is already in the recommendations."
+  - "None of the group members have rated the movie."
+- User analysis
+  - "User has given a high rating for the movie, but they could have given an even higher rating to get the movie in the recommendations."
+  - "User has not rated the movie. This substantially decreases the movie score."
+  - "User hadn't given a high enough rating for the movie. They gave a rating of which is lower than the last movie in the recommendations."
+- When movie rank is in the range $(10,100]$
+  - "The movie rank is outside the group recommendations. You asked for only top 10 movies. You could consider asking top-k to get the movie in the recommendations."
+- When the movie is not in the recommendations due to a tie
+  - "The movie has the same score as the last movie in the recommendations, but it was not included in the recommendations because it didn't fit in the top-10 recommendations."
+- "It is possible that the movie is simply not suitable for the group. The movie has received a rating of r on average. The other movies could be more suitable for the group."
+
+### 2. Group granularity case: Why not action movies?
+<!-- vähän niinkuin vain group -->
 
 Examples answers for Group granularity case:
-<!-- vähän niinkuin vain group -->
 
 - An item does not exist in the database of the system.
   - "Action does not exist in the database."
@@ -47,31 +46,32 @@ Examples answers for Group granularity case:
 - "Only 1 action movie is in the group top-10 recommendations"
 - Only x group members like comedies.
 
-Examples answers for Position absenteeism
+### 3. Position absenteeism: Why not rank Matrix first?
 <!-- käytännössä molemmat -->
 
-- An item does not exist in the database of the system.
-  - "Matrix does not exist in the database."
-<!-- - Number of returned top-k items.
-  - "You asked for few items." -->
-- The tie-breaking method
-  - "Matrix had the same score as Iron Man"
+We use this explanation engine for movies that are in the group recommendations.
 
-- x peers like A, but y dislike it
-  - Like
-    - User 1: 5.0
-  - Dislike
-    - User 1: 3.5
-    - User 2: 2.0
-<!-- - None of the group has rated this item -->
-<!-- - The group has no recommendations for this item -->
+Examples answers for Position absenteeism
 
-- Movie A is not suitable enough for the group.
+- Error checking
+  - "The movie does not exist in the database."
+  - "Can't answer why the movie isn't higher in the recommendations because the movie is not in the recommendations. Use the atomic granularity case instead."
+  - "The movie is already the highest in the recommendations."
+  - "None of the group members have rated the movie."
+- User analysis
+  - "User has given a high rating for the movie, but they could have given an even higher rating to get the movie in the recommendations."
+  - "User has not rated the movie. This substantially decreases the movie score."
+  - "User hadn't given a high enough rating for the movie. They gave a rating which is lower than the first movie in the recommendations."
+- When the movie is not higher in the recommendations due to a tie
+  - "The movie has the same score as another movie in the recommendations. The movie was not higher in the recommendations because the order is not defined for movies with the same score."
+- "It is possible that the movie is simply not suitable enough to be higher on the recommendations for the group. The movie has received a rating of r on average. The other movies could be more suitable for the group."
+
+<!-- TODO group granularity 
 - "Your group prefers \[most common genre\] movies"
 - "Your group dislikes action movies"
 - None of group members has rated a comedy.
 - "Only 1 action movie is in the group top-10 recommendations"
-- Only x group members like comedies.
+- Only x group members like comedies. -->
 
 ## Results
 
