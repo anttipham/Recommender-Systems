@@ -23,7 +23,6 @@ MOVIE = "Matrix, The (1999)"
 GENRE = "action"
 
 
-## Why-not Logic
 def atomic_granularity_case(
     movies: dict[int, Movie], movie_recs: list[int], movie_id: int
 ) -> list[str]:
@@ -296,6 +295,7 @@ def position_absenteeism(
     # - "Your group dislikes action movies"
     # - "Only 1 action movie is in the group top-10 recommendations"
     # - Only x group members like comedies.
+    return explanations
 
 
 ## Data Processing
