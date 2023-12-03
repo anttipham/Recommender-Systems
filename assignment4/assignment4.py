@@ -20,7 +20,7 @@ import assignment3 as asg3
 # Number of recommendations
 N = 10
 # Analysis limit
-LIMIT = 100
+ANALYSIS_LIMIT = 100
 GROUP = [233, 9, 242]
 MOVIE = "Matrix, The (1999)"
 GENRE = "action"
@@ -87,7 +87,7 @@ def atomic_granularity_case(
         )
     # - Number of returned top-k items.
     movie_index = movie_recs.index(movie_id)
-    if movie_index < LIMIT:
+    if movie_index < ANALYSIS_LIMIT:
         # Ceiling to nearest 10
         top_k = math.ceil((movie_index + 1) / 10) * 10
         explanations.append(
