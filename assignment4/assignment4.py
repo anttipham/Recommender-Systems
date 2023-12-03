@@ -118,36 +118,87 @@ def atomic_granularity_case(
     return explanations
 
 
-def genre_analysis(
-    movies: dict[int, Movie], movie_recs: list[int], genre: list[str]
-) -> list[str]:
-    """
-    Generates explanations for the genre analysis.
+# TODO: Sophie. Kirjoitin jotain. Voit käyttää tai poistaa, jos haluat
+# def all_genres(movies: dict[int, Movie]) -> set[str]:
+#     """
+#     Returns a set of all genres in the movie database.
 
-    The genre list contains the genres that the analysis generates explanations
-    for. The genres are interpreted as a logical AND. For example, if the
-    genre list is ["action", "comedy"], then the explanations are generated
-    for movies that are both action and comedy movies.
+#     Args:
+#         movies (dict[int, Movie]): Movie dictionary where key is movie_id and
+#             value is Movie object.
 
-    Args:
-        movies (dict[int, Movie]): Movie dictionary where key is movie_id and
-            value is Movie object.
-        movie_recs (list[int]): List of movie_ids in order of recommendation.
-        genre (list[str]): List of genres to analyze.
-    """
-    # Sort top-M movies by the genre
-    movies_by_genre = {}
-    for movie_id in movie_recs[:LIMIT]:
-        for gen in movies[movie_id].genres:
-            if gen in movies_by_genre:
-                movies_by_genre[gen].append(movie_id)
-            else:
-                movies_by_genre[gen] = [movie_id]
+#     Returns:
+#         set[str]: Set of all genres in the movie database.
+#     """
+#     genres: set[str] = set()
+#     for movie in movies.values():
+#         genres.update(movie.genres)
+#     return genres
+
+
+# def genre_statistics(
+#     movies: dict[int, Movie],
+#     movie_recs: list[int],
+#     limit: int,
+# ) -> tuple[dict[str, float], dict[str, int]]:
+#     """
+#     Args:
+#         limit (int): Cut-off limit of the movie_recs list.
+
+#     Returns:
+#         tuple[dict[str, float], dict[str, int]]: Mean scores and samples
+#                                                     for each genre.
+#     """
+#     scores: dict[str, float] = {}
+#     samples: dict[str, int] = {}
+#     for movie_id in movie_recs[:limit]:
+#         for genre in movies[movie_id].genres:
+#             if genre not in scores:
+#                 scores[genre] = 0.0
+#             if genre not in samples:
+#                 samples[genre] = 0
+
+#             scores[genre] += movies[movie_id].avg_rating
+#             samples[genre] += 1
+#     mean_scores = {genre: scores[genre] / samples[genre] for genre in scores}
+#     return mean_scores, samples
 
 
 def group_granularity_case(
     movies: dict[int, Movie], movie_recs: list[int], genre: str
 ) -> list[str]:
+    """
+    Generates explanations for the genre analysis.
+
+    The genre list contains the genres that the analysis generates explanations
+    for.
+
+    Args:
+        movies (dict[int, Movie]): Movie dictionary where key is movie_id and
+            value is Movie object.
+        movie_recs (list[int]): List of movie_ids in order of recommendation.
+        genre (str): Genre to analyze.
+    """
+
+    # TODO: Sophie. Kirjoitin jotain. Voit käyttää tai poistaa, jos haluat
+    # # Top movies by the genre
+    # mean_genre_scores, genre_samples = genre_statistics(movies, movie_recs, N)
+    # all_mean_genre_scores, _ = genre_statistics(movies, movie_recs, len(movie_recs))
+    # # Error checking.
+    # # - An item does not exist in the database of the system.
+    # if genre not in all_genres(movies):
+    #     return [f"The genre {genre} does not exist in the database."]
+    # # - Item is already in the recommendations.
+    # max_samples = max(genre_samples.values())
+    # if genre_samples[genre] == max_samples:
+    #     return [
+    #         f"The genre {genre} is already the most common genre "
+    #         "in the recommendations."
+    #     ]
+    # # - None of group members has rated a comedy.
+    # if all_mean_genre_scores[genre] == 0.0:
+    #     return [f"None of the group members have rated a {genre} movie."]
+
     # NOTE only movies with avg_rating >= 3 are valid recommendations
     # for the explanations for the why-not questions.
     # other movies are considered to not be recommendations at all
@@ -486,6 +537,7 @@ def find_movie_id(movies: dict[int, Movie], movie_title: str) -> int:
 def main():
     # Fetch all movie objects with related info, as well as top-10 movie_ids
     movies, movie_recs = read_data()
+    print(len(movies), len(movie_recs))
 
     print(f"\n## Top-{N} Average Recommendations for Group {GROUP} ##\n")
     pretty_print_recs(movies, movie_recs)
