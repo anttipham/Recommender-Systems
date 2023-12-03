@@ -294,7 +294,7 @@ def position_absenteeism(
     Returns:
         list[str]: List of explanations.
     """
-    # Error checking.
+    # Error checking
     # - An item does not exist in the database of the system.
     if movie_id not in movie_recs:
         return ["The movie does not exist in the database."]
@@ -317,12 +317,7 @@ def position_absenteeism(
 
     # Generate explanations.
     explanations: list[str] = []
-    # - x peers like A, but y dislike it
-    #   - Like
-    #     - User 1: 5.0
-    #   - Dislike
-    #     - User 1: 3.5
-    #     - User 2: 2.0
+    # User movie analysis
     first_movie = movies[movie_recs[0]]
     for user_id, user_score in sorted(movie.user_ratings.items(), key=lambda x: x[1]):
         if user_score == 5.0:
@@ -347,6 +342,24 @@ def position_absenteeism(
             f"They gave a rating of {user_score:.2f} which is lower than "
             f"the first movie in the recommendations."
         )
+
+    # Group genre analysis
+    # - When the genre is not the best genre in the recommendations
+    #   - "Your group prefers genre X movies. This could be the reason why the
+    #      genre is not the most common in the recommendations."
+    genres = Counter()
+    for rec_id in movie_recs[:N]:
+        genres.update(movies[rec_id].genres)
+    most_common_genres = genres.most_common(len(movie.genres))
+    top_genres = set(genre for genre, _ in most_common_genres)
+    if set(movie.genres) != top_genres:
+        explanations.append(
+            "Your group prefers the following genres: "
+            f"{', '.join(top_genres)}, but the movie {movie.title} is "
+            f"of the following genres: {', '.join(movie.genres)}."
+        )
+
+    # General movie analysis
     # - The tie-breaking method
     # Float equality check has to be done with isclose() because of
     # floating point arithmetic.
@@ -370,15 +383,7 @@ def position_absenteeism(
             f"a rating of {movie.avg_rating:.2f} on average. "
             "The other movies could be more suitable for the group."
         )
-    # -----------------------------------------------------------------------
-    # TODO: Jatketaan virheentarkastuksilla, kun group granularity case on valmis
-    # - "Your group prefers \[most common genre\] movies"
-    # - "Your group dislikes action movies"
-    # - "Only 1 action movie is in the group top-10 recommendations"
-    # - Only x group members like comedies.
-    for genre in movie.genres:
-        explanation = group_granularity_case(movies, movie_recs, genre)
-        explanations += explanation
+
     return explanations
 
 
