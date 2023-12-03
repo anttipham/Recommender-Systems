@@ -371,11 +371,14 @@ def position_absenteeism(
             "The other movies could be more suitable for the group."
         )
     # -----------------------------------------------------------------------
-    # TODO: group granularity case
+    # TODO: Jatketaan virheentarkastuksilla, kun group granularity case on valmis
     # - "Your group prefers \[most common genre\] movies"
     # - "Your group dislikes action movies"
     # - "Only 1 action movie is in the group top-10 recommendations"
     # - Only x group members like comedies.
+    for genre in movie.genres:
+        explanation = group_granularity_case(movies, movie_recs, genre)
+        explanations += explanation
     return explanations
 
 
