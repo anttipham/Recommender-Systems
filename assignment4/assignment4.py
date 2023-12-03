@@ -17,7 +17,10 @@ from tabulate import tabulate
 import assignment2 as asg2
 import assignment3 as asg3
 
+# Number of recommendations
 N = 10
+# Analysis limit
+LIMIT = 100
 GROUP = [233, 9, 242]
 MOVIE = "Matrix, The (1999)"
 GENRE = "action"
@@ -84,7 +87,7 @@ def atomic_granularity_case(
         )
     # - Number of returned top-k items.
     movie_index = movie_recs.index(movie_id)
-    if movie_index < 100:
+    if movie_index < LIMIT:
         # Ceiling to nearest 10
         top_k = math.ceil((movie_index + 1) / 10) * 10
         explanations.append(
@@ -113,6 +116,33 @@ def atomic_granularity_case(
             "The other movies could be more suitable for the group."
         )
     return explanations
+
+
+def genre_analysis(
+    movies: dict[int, Movie], movie_recs: list[int], genre: list[str]
+) -> list[str]:
+    """
+    Generates explanations for the genre analysis.
+
+    The genre list contains the genres that the analysis generates explanations
+    for. The genres are interpreted as a logical AND. For example, if the
+    genre list is ["action", "comedy"], then the explanations are generated
+    for movies that are both action and comedy movies.
+
+    Args:
+        movies (dict[int, Movie]): Movie dictionary where key is movie_id and
+            value is Movie object.
+        movie_recs (list[int]): List of movie_ids in order of recommendation.
+        genre (list[str]): List of genres to analyze.
+    """
+    # Sort top-M movies by the genre
+    movies_by_genre = {}
+    for movie_id in movie_recs[:LIMIT]:
+        for gen in movies[movie_id].genres:
+            if gen in movies_by_genre:
+                movies_by_genre[gen].append(movie_id)
+            else:
+                movies_by_genre[gen] = [movie_id]
 
 
 def group_granularity_case(
