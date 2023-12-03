@@ -32,19 +32,24 @@ Examples answers for Atomic granularity case:
 
 Examples answers for Group granularity case:
 
-- An item does not exist in the database of the system.
-  - "Action does not exist in the database."
-- Number of returned top-k items.
-  - "You asked for few items."
-- The tie-breaking method
-  - "Action had the same score as comedy"
-
-- Movie A is not suitable for the group.
-- "Your group prefers \[most common genre\] movies"
-- "Your group dislikes action movies"
-- None of group members has rated a comedy.
-- "Only 1 action movie is in the group top-10 recommendations"
-- Only x group members like comedies.
+- Error checking
+  - "The genre does not exist in the database."
+  - "The genre is already the most common genre in the recommendations."
+  - "None of the group members have rated a movie of the genre."
+- User analysis
+  <!-- - TODO: Sophie
+  - "User has given a high rating for movies of this genre, but they could have given an even higher rating to get more movies of the genre in the recommendations."
+  - "User has not rated a movie of this genre."
+  - "User X hasn't given a high enough rating for movies of this genre. They gave a rating of which is lower than the last movie in the recommendations." -->
+- Group analysis
+  - "Your group prefers genre X movies. This could be the reason why the genre is not the most common in the recommendations."
+  - When the genre is the least common in the recommendations
+    - "Your group dislikes the genre."
+- When extending the recommendations to top-k makes the genre the most common
+  - "The genre is the most common when the recommendations are extended to top-k. You could consider asking top-k recommendations to get more movies of the genre in the recommendations."
+- When the genre is not the most common in the recommendations due to a tie
+  - "The genre could be the most common in the recommendations, but it is not because the order is not defined for movies with the same score."
+- "It is possible that the genre is simply not suitable for the group. There are x movies of this genre in the group recommendation. The other genres could be more suitable for the group."
 
 ### 3. Position absenteeism: Why not rank Matrix first?
 <!-- käytännössä molemmat -->
@@ -66,7 +71,7 @@ Examples answers for Position absenteeism
   - "The movie has the same score as another movie in the recommendations. The movie was not higher in the recommendations because the order is not defined for movies with the same score."
 - "It is possible that the movie is simply not suitable enough to be higher on the recommendations for the group. The movie has received a rating of r on average. The other movies could be more suitable for the group."
 
-<!-- TODO group granularity 
+<!-- TODO group granularity
 - "Your group prefers \[most common genre\] movies"
 - "Your group dislikes action movies"
 - None of group members has rated a comedy.
