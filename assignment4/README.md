@@ -86,7 +86,7 @@ Answers for position absenteeism:
   - "User has not rated the movie. This substantially decreases the movie score."
   - "User hadn't given a high enough rating for the movie. They gave a rating which is lower than the first movie in the recommendations."
 - Group genre analysis
-  - When the genre is not the best genre in the recommendations
+  - When the movie genre is not the most common genres in the recommendations
     - "Your group prefers the following genres: [list of genres], but the movie is of the following genres: [list of genres]."
 - General movie analysis
   - When the movie is not higher in the recommendations due to a tie
