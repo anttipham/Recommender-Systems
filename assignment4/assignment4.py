@@ -78,7 +78,7 @@ def atomic_granularity_case(
             )
             continue
         explanations.append(
-            f"User {user_id} hadn't given a high enough rating for "
+            f"User {user_id} hasn't given a high enough rating for "
             f"the movie {movie.title}. "
             f"They gave a rating of {user_score:.2f} which is lower than "
             f"the last movie in the recommendations."
@@ -116,7 +116,7 @@ def atomic_granularity_case(
     return explanations
 
 
-def genre_statistics(
+def genre_stats(
     movies: dict[int, Movie],
     movie_recs: list[int],
     limit: int,
@@ -161,22 +161,17 @@ def group_granularity_case(
     """
 
     # Top movies by the genre
-    topk_means, topk_genre_samples = genre_statistics(movies, movie_recs, N)
-    analysis_means, analysis_genre_samples = genre_statistics(movies, movie_recs, ANALYSIS_LIMIT)
-    all_means, all_samples = genre_statistics(movies, movie_recs, len(movie_recs))
+    _, topk_genre_samples = genre_stats(movies, movie_recs, N)
+    _, analysis_genre_samples = genre_stats(movies, movie_recs, ANALYSIS_LIMIT)
+    all_means, _ = genre_stats(movies, movie_recs, len(movie_recs))
 
     ## Error checking
     # - An item does not exist in the database of the system.
     if genre not in all_means.keys():
         return [f"The genre {genre} does not exist in the database."]
     
-    # - Item is already in the recommendations.
-    max_samples = max(topk_genre_samples.values(), key=len)
-    if genre == max_samples:
-        return [f"{genre} is already the most common recommendation genre."]
-    
     # - None of group members has rated a comedy.
-    if all_means[genre] == 0.0:
+    if math.isclose(all_means[genre], 0.0):
         return [f"None of the group members have rated a {genre} movie."]
 
     # Generate explanations
@@ -184,29 +179,35 @@ def group_granularity_case(
 
     ## Group analysis
     topk_best_genre = max(topk_genre_samples, key=lambda k: len(topk_genre_samples[k]))
-    explanations.append(
-        f"Your group prefers {topk_best_genre} movies. This could be the "
-        f"reason why {genre} movies are not in the recommendations."
-    )
+    if topk_best_genre == genre:
+        explanations.append(
+            f"{genre.capitalize()} is already the most common genre "
+            f"in the top-{N} recommendations."
+        )
+    
+    # these explanations only apply if we aren't analyzing the most common genre
+    else:
+        explanations.append(
+            f"Your group prefers {topk_best_genre} movies. This could be the "
+            f"reason why {genre} movies are not in the recommendations."
+        )
 
-    topk_worst_genre = min(topk_genre_samples, key=lambda k: len(topk_genre_samples[k]))
-    if topk_worst_genre == genre:
-        explanations.append(f"Your group does not like {genre} movies.")
-
-    ## General genre analysis
-    topk_of_genre = len(topk_genre_samples[genre]) if genre in topk_genre_samples else 0
-    explanations.append(
-        f"It is possible that the genre is simply not suitable for the group. "
-        f"Only {topk_of_genre} of the top-{N} recommendations are {genre} movies."
-        f"The other genres could be more suitable for the group."
-    )
-
-    # size of top-k: does extending make it the most common?
-    if genre not in topk_genre_samples:
-
-        # find if extending to more recommendations makes it the most common
+        topk_worst_genre = min(topk_genre_samples, key=lambda k: len(topk_genre_samples[k]))
+        if topk_worst_genre == genre:
+            explanations.append(f"Your group does not like {genre} movies.")
+        
+        
+        ## General genre analysis
+        num_of_genre_in_topk = len(topk_genre_samples[genre]) if genre in topk_genre_samples else 0
+        explanations.append(
+            f"It is possible that the genre is simply not suitable for the group. "
+            f"Only {num_of_genre_in_topk} of the top-{N} recommendations are {genre} movies. "
+            f"The other genres could be more suitable for the group."
+        )
+    
+        # find if extending to more recommendations (top-k+?) makes the genre the most common
         for k in range(N, ANALYSIS_LIMIT+1, 10):
-            _, new_topk_genre_samples = genre_statistics(movies, movie_recs, k)
+            _, new_topk_genre_samples = genre_stats(movies, movie_recs, k)
             new_topk_best_genre = max(new_topk_genre_samples, key=lambda k: len(new_topk_genre_samples[k]))
             if genre == new_topk_best_genre:
                 explanations.append(
@@ -216,29 +217,60 @@ def group_granularity_case(
                 )
                 break
 
-    # genre is in top-k recommendations
-    # find if there is a tie (same movie scores)
-    else:
-        num_of_ties = 0
-        for best_movie in topk_genre_samples[topk_best_genre]:
-            best_score = movies[best_movie].avg_rating
+        # find if there is a tie
+        if genre in topk_genre_samples:
+            num_of_ties = 0
+            for best_movie in topk_genre_samples[topk_best_genre]:
+                best_score = movies[best_movie].avg_rating
 
-            for movie in analysis_genre_samples[genre]:
-                is_tie = math.isclose(best_score, movies[movie].avg_rating)
-                if is_tie:
-                    num_of_ties += 1
-        
-        if len(topk_genre_samples[topk_best_genre]) == len(topk_genre_samples[genre]) - num_of_ties:
-            explanations.append(
-                f"The genre {genre} could be the most common in the "
-                f"recommendations, but it is not because the order "
-                f"is not defined for movies with the same score."
-            )
+                for movie in analysis_genre_samples[genre]:
+                    is_tie = math.isclose(best_score, movies[movie].avg_rating)
+                    if is_tie:
+                        num_of_ties += 1
+            
+            if len(topk_genre_samples[topk_best_genre]) == len(topk_genre_samples[genre]) - num_of_ties:
+                explanations.append(
+                    f"The genre {genre} could be the most common in the "
+                    f"recommendations, but it is not because the order "
+                    f"is not defined for movies with the same score."
+                )
 
 
     ## User analysis
-    # TODO
+    topk_last_movie_rating = movies[movie_recs[N - 1]].avg_rating
 
+    # initialize dict with user_id, where list (num_lower, num_higher) tells if 
+    # the given score is lower/higher than the last movie of the top-k recs
+    genre_movies_user_info: dict[int, list] = {}
+
+    # Compile information about user ratings for movies of this genre
+    for movie_id in analysis_genre_samples[genre]:
+        for user_id, rating in movies[movie_id].user_ratings.items():
+            if user_id not in genre_movies_user_info:
+                genre_movies_user_info[user_id] = list(0 for _ in range(2))
+            
+            if rating != 0:
+                if rating < topk_last_movie_rating:
+                    genre_movies_user_info[user_id][0] += 1
+                else:
+                    genre_movies_user_info[user_id][1] += 1
+
+    # Generate user specific explanations
+    for user_id, (num_lower, num_higher) in genre_movies_user_info.items():
+        if num_lower + num_higher == 0:
+            explanations.append(f"User {user_id} has not rated a {genre} movie.")
+        elif num_higher > num_lower:
+            explanations.append(
+                f"User {user_id} has given {num_higher} high ratings for "
+                f"{genre} movies, but they could have given an even higher "
+                f"ratings to get more {genre} movies in the top-{N} recommendations."
+            )
+        else:
+            explanations.append(
+                f"User {user_id} hasn't given high enough ratings for {genre} "
+                f"movies. They gave {num_lower} ratings which are smaller "
+                f"than the last movie in the top-{N} recommendations received."
+            )
 
     return explanations
 
@@ -301,7 +333,7 @@ def position_absenteeism(
             )
             continue
         explanations.append(
-            f"User {user_id} hadn't given a high enough rating for "
+            f"User {user_id} hasn't given a high enough rating for "
             f"the movie {movie.title}. "
             f"They gave a rating of {user_score:.2f} which is lower than "
             f"the first movie in the recommendations."
