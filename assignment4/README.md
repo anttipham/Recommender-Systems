@@ -3,16 +3,18 @@
 ## Implementation Details and Assumptions
 
 - All assumptions made in the implementation details for previous assigments apply, since their code is reused. This includes the following:
-  - The prediction function can give a rating over 5. This is not a mistake, but a property of the prediction formula adding and subtracting the biases (movie mean ratings) of the users.
+  - The prediction function can give a rating over 5. This is not a mistake, but a property of the prediction formula adding and subtracting the biases (movie mean ratings) of the users. 
+  - Pearson correlation is used for calculating the similarity between users in the user-based filtering. 
   - Movies that some users have already seen can still be recommended to the group if the aggregation methods deems them to be best matches. This is based on the idea that a group member is open to seeing a movie again if everyone else is satisfied with the recommendation, and they liked it.
   - Aggregation methods (average) use either real or predicted ratings for movies when aggregating group recommendations. This is due to many gaps in the dataset (users have often only rated a few movies). Now we can still concider their preferences when performing the group aggregation.
+  - All applicable assumptions from previous assingments are assumed, please see their `README.md` files if necessary.
 
 ## Running the script
 
 - User needs to provide path to the MovieLens 100K ratings dataset when calling the script. Call the script inside the `assignment4` directory. Usage:
 
   ```python
-  python assignment3.py <path/to/ml-latest-small/>
+  python assignment4.py <path/to/ml-latest-small/>
   ```
 
   ml-latest-small is the directory containing the ratings.csv and movies.csv files.
@@ -133,5 +135,45 @@ Produce a group of 3 users, and for this group, show the top-10 recommendations,
 the 10 movies with the highest prediction scores, using the MovieLens 100K rating
 dataset. Given this recommendation list, take as input one why-not question example
 from each of the above cases and report the corresponding explanations (Score: 10%).
+
+```txt
+## Top-10 Average Recommendations for Group [233, 9, 242] ##
+
+  Rank    Movie ID  Title                                                        Average Rating
+------  ----------  ---------------------------------------------------------  ----------------
+     1        7361  Eternal Sunshine of the Spotless Mind (2004)                           4.59
+     2        5952  Lord of the Rings: The Two Towers, The (2002)                          4.42
+     3         318  Shawshank Redemption, The (1994)                                       4.35
+     4        2329  American History X (1998)                                              4.27
+     5         593  Silence of the Lambs, The (1991)                                       4.21
+     6         608  Fargo (1996)                                                           4.2
+     7          50  Usual Suspects, The (1995)                                             4.17
+     8        4993  Lord of the Rings: The Fellowship of the Ring, The (2001)              4.16
+     9        3897  Almost Famous (2000)                                                   4.16
+    10         356  Forrest Gump (1994)                                                    4.11
+
+## Why-not Questions Regarding the Recommendations ##
+
+Why wasn't movie Matrix, The (1999) in the recommendation?
+1. User 233 has not been given a high enough prediction score for the movie Matrix, The (1999). They were given a score of 4.11 which is lower than the last movie in the recommendations.
+2. User 9 has not been given a high enough prediction score for the movie Matrix, The (1999). They were given a score of 3.58 which is lower than the last movie in the recommendations.
+3. User 242 has not been given a high enough prediction score for the movie Matrix, The (1999). They were given a score of 3.94 which is lower than the last movie in the recommendations.
+4. The movie rank for Matrix, The (1999) is 21 in the recommendations. You asked for only top-10 movies. You could consider asking top-30 to get the movie in the recommendations.
+5. It is possible that the movie Matrix, The (1999) is simply not suitable for the group. The movie has received a score of 3.88 on average. The other movies could be more suitable for the group.
+
+Why not more romance movies?
+1. Your group prefers drama movies. This could be the reason why romance movies are not in the recommendations.
+2. It is possible that the genre is simply not suitable for the group. Only 2 of the top-10 recommendations are romance movies. The other genres could be more suitable for the group.
+3. User 233 hasn't given high enough ratings for romance movies. They gave 7 ratings which are smaller than the last movie in the top-10 recommendations received.
+4. User 9 hasn't given high enough ratings for romance movies. They gave 10 ratings which are smaller than the last movie in the top-10 recommendations received.
+5. User 242 hasn't given high enough ratings for romance movies. They gave 6 ratings which are smaller than the last movie in the top-10 recommendations received.
+
+Why not rank Fargo (1996) first?
+1. User 9 has not been given a high enough prediction score for the movie Fargo (1996). They gave a score of 3.96 which is lower than the first movie in the recommendations.
+2. User 242 has not been given a high enough prediction score for the movie Fargo (1996). They gave a score of 4.06 which is lower than the first movie in the recommendations.
+3. User 233 has not been given a high enough prediction score for the movie Fargo (1996). They gave a score of 4.57 which is lower than the first movie in the recommendations.
+4. Your group prefers the following genres: drama, crime, thriller, romance, but the movie Fargo (1996) is of the following genres: comedy, crime, drama, thriller.
+5. It is possible that the movie Fargo (1996) is simply not suitable enough to be higher on the recommendations for the group. The movie has received a score of 4.20 on average. The other movies could be more suitable for the group.
+```
 
 ## Prepare also a short presentation (about 5 slides) to show how your method works (Score: 10%)
