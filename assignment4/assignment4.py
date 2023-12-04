@@ -23,6 +23,10 @@ N = 10
 ANALYSIS_LIMIT = 100
 GROUP = [233, 9, 242]
 
+MOVIE_ATOMIC = "Matrix, The (1999)"
+GENRE = "romance"
+MOVIE_ABSENTEEISM = "Fargo (1996)"
+
 
 def atomic_granularity_case(
     movies: dict[int, Movie], movie_recs: list[int], movie_id: int
@@ -550,27 +554,24 @@ def main():
     print("\n## Why-not Questions Regarding the Recommendations ##\n")
 
     # 1st queston: atomic granularity case
-    movie_title = "Matrix, The (1999)"
-    movie_id = find_movie_id(movies, movie_title)
+    movie_id = find_movie_id(movies, MOVIE_ATOMIC)
 
-    print(f"Why wasn't movie {movie_title} in the recommendation?")
+    print(f"Why wasn't movie {MOVIE_ATOMIC} in the recommendation?")
     explanations1 = atomic_granularity_case(movies, movie_recs, movie_id)
     for i, explanation in enumerate(explanations1):
         print(f"{i+1}. {explanation}")
     print()
 
     # 2nd question: group granularity case
-    genre = "romance"
-    print(f"Why not more {genre} movies?")
-    for idx, exp in enumerate(group_granularity_case(movies, movie_recs, genre)):
+    print(f"Why not more {GENRE} movies?")
+    for idx, exp in enumerate(group_granularity_case(movies, movie_recs, GENRE)):
         print(f"{idx+1}. {exp}")
     print()
 
     # 3rd question: position absenteeism case
-    movie_title = "Fargo (1996)"
-    movie_id = find_movie_id(movies, movie_title)
+    movie_id = find_movie_id(movies, MOVIE_ABSENTEEISM)
 
-    print(f"Why not rank {movie_title} first?")
+    print(f"Why not rank {MOVIE_ABSENTEEISM} first?")
     explanations3 = position_absenteeism(movies, movie_recs, movie_id)
     for i, explanation in enumerate(explanations3):
         print(f"{i+1}. {explanation}")

@@ -2,7 +2,37 @@
 
 ## Implementation Details and Assumptions
 
+- All assumptions made in the implementation details for previous assigments apply, since their code is reused. This includes the following:
+  - The prediction function can give a rating over 5. This is not a mistake, but a property of the prediction formula adding and subtracting the biases (movie mean ratings) of the users.
+  - Movies that some users have already seen can still be recommended to the group if the aggregation methods deems them to be best matches. This is based on the idea that a group member is open to seeing a movie again if everyone else is satisfied with the recommendation, and they liked it.
+  - Aggregation methods (average) use either real or predicted ratings for movies when aggregating group recommendations. This is due to many gaps in the dataset (users have often only rated a few movies). Now we can still concider their preferences when performing the group aggregation.
+
 ## Running the script
+
+- User needs to provide path to the MovieLens 100K ratings dataset when calling the script. Call the script inside the `assignment4` directory. Usage:
+
+  ```python
+  python assignment3.py <path/to/ml-latest-small/>
+  ```
+
+  ml-latest-small is the directory containing the ratings.csv and movies.csv files.
+
+- We print all results to console output straight from `main`. To change the input parameters (user group members etc.), please see the following global variables in `assignment4.py`
+
+  ```python
+  # Number of group recommendations. (This is our k in 'top-k' recommendations.)
+  N = 10
+  # Analysis limit is used to limit the number of movies analyzed in the explanations
+  ANALYSIS_LIMIT = 100
+  GROUP = [233, 9, 242]
+
+  # Atomic granularity case
+  MOVIE_ATOMIC = "Matrix, The (1999)"
+  # Group granularity case
+  GENRE = "romance"
+  # Position absenteeism case
+  MOVIE_ABSENTEEISM = "Fargo (1996)"
+  ```
 
 ## Design (Score: 40%) and implement (Score: 40%) methods for producing explanations for group recommendations for the granularity case
 
@@ -12,7 +42,7 @@ Error checking is used to check if the input is valid. For example, if the movie
 
 User movie and genre analyses is used to check if the individual users have rated the item high enough to get the item in the recommendations.
 
-Group genre analyses is used to check the group preference.
+Group genre analysis is used to check the group preference.
 
 General analysis is used to check general reasons why the item is not in the recommendations. For example, the item could be outside the top-10 recommendations due to a tie, or the analysis could recommend the user to ask for a bigger recommendation list etc.
 
@@ -21,6 +51,8 @@ General analysis is used to check general reasons why the item is not in the rec
 We use this explanation engine for movies that are not in the top-10 group recommendations.
 
 The explanation engine contains error checking, user movie analysis, and general movie analysis.
+
+We will next present the answers of the explanation engine in a list format. We include when-conditions if they are needed. Otherwise, we will omit them when the meaning can be understood without them. *For example, the explanation "The movie does not exist in the database." does not need an explicit condition of "When movie does not exist in the database" since it is already clear from the explanation.*
 
 Answers for atomic granularity case:
 
@@ -73,6 +105,8 @@ Answers for group granularity case:
 We use this explanation engine for movies that are in the top-10 group recommendations.
 
 This explanation engine is mostly the same as the atomic granularity case, but we also include group genre analysis to give the user a more in-depth explanation of why the movie is not higher in the recommendations.
+
+We think that a more in-depth explanation is needed for movies that are already in the recommendations because the user might want to know the small details and possible explanation when asking this specific question.
 
 Answers for position absenteeism:
 
