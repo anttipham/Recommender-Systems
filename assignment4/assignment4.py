@@ -221,27 +221,28 @@ def group_granularity_case(
 
         # check for tie: does it effect the most common genre
         topk_last_rating = movies[movie_recs[N - 1]].avg_rating
+        replaced_movie_recs = movie_recs.copy()[:ANALYSIS_LIMIT]
         
         # find the indices of the tied movies (both before and after last)
         start_i = None
         for i in range(0, ANALYSIS_LIMIT):
-            if math.isclose(movies[movie_recs[i]].avg_rating, topk_last_rating):
+            if math.isclose(movies[replaced_movie_recs[i]].avg_rating, topk_last_rating):
                 if not start_i:
                     start_i = i
                 end_i = i
         
         # movies in the genre that have tied with the last movie in the top-k
-        all_tied = set(movie_recs[start_i:end_i])
+        all_tied = set(replaced_movie_recs[start_i:end_i])
         genre_movies = set(analysis_genre_samples[genre])
         genre_tied = genre_movies.intersection(all_tied)
         not_genre_tied = all_tied.difference(genre_movies)
 
         # replace the tied movies, starting with asked about genre
         for j in range(start_i, end_i):
-            movie_recs[j] = genre_tied.pop() if genre_tied else not_genre_tied.pop()
+            replaced_movie_recs[j] = genre_tied.pop() if genre_tied else not_genre_tied.pop()
 
         # check if the genre is now the most common
-        _, topk_genre_samples = genre_stats(movies, movie_recs, N)
+        _, topk_genre_samples = genre_stats(movies, replaced_movie_recs, N)
         replaced_topk_best_genre = max(new_topk_genre_samples, key=lambda k: len(new_topk_genre_samples[k]))
         if genre == replaced_topk_best_genre:
             explanations.append(
