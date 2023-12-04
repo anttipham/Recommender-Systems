@@ -49,40 +49,38 @@ def atomic_granularity_case(
         return ["The movie is already in the recommendations."]
     # - None of the group has rated this item
     if movie.avg_rating == 0:
-        return [f"None of the group members have rated the movie {movie.title}."]
+        return [
+            "None of the group members have been predicted "
+            f"a score for the movie {movie.title}."
+        ]
 
     # Generate explanations.
     explanations: list[str] = []
-    # - x peers like A, but y dislike it
-    #   - Like
-    #     - User 1: 5.0
-    #   - Dislike
-    #     - User 1: 3.5
-    #     - User 2: 2.0
+    # User movie analysis
     last_movie = movies[movie_recs[N - 1]]
-    for user_id, user_score in sorted(movie.user_ratings.items(), key=lambda x: x[1]):
+    for user_id, user_score in movie.user_ratings.items():
         if user_score == 5.0:
             continue
         if user_score >= last_movie.avg_rating:
             explanations.append(
-                f"User {user_id} has given a high rating of {user_score:.2f} "
-                f"for the movie {movie.title}, but they could have given an "
-                "even higher rating to get the movie in the recommendations."
+                f"User {user_id} has given a high prediction score of "
+                f"{user_score:.2f} for the movie {movie.title}."
             )
             continue
         if user_score == 0:
-            # - User x has no recommendations for this item
             explanations.append(
-                f"User {user_id} has not rated the movie {movie.title}. "
+                f"User {user_id} has not been given a prediction score for "
+                f"the movie {movie.title}. "
                 f"This substantially decreases the score for {movie.title}."
             )
             continue
         explanations.append(
-            f"User {user_id} hasn't given a high enough rating for "
-            f"the movie {movie.title}. "
-            f"They gave a rating of {user_score:.2f} which is lower than "
+            f"User {user_id} has not been given a high enough prediction "
+            f"score for the movie {movie.title}. "
+            f"They were given a score of {user_score:.2f} which is lower than "
             f"the last movie in the recommendations."
         )
+    # General movie analysis
     # - Number of returned top-k items.
     movie_index = movie_recs.index(movie_id)
     if movie_index < ANALYSIS_LIMIT:
@@ -110,7 +108,7 @@ def atomic_granularity_case(
         explanations.append(
             f"It is possible that the movie {movie.title} is simply not "
             "suitable for the group. The movie has received "
-            f"a rating of {movie.avg_rating:.2f} on average. "
+            f"a score of {movie.avg_rating:.2f} on average. "
             "The other movies could be more suitable for the group."
         )
     return explanations
@@ -142,7 +140,7 @@ def genre_stats(
 
             scores[genre] += movies[movie_id].avg_rating
             samples[genre].append(movie_id)
-    
+
     mean_scores = {genre: scores[genre] / len(samples[genre]) for genre in scores}
     return mean_scores, samples
 
@@ -169,7 +167,7 @@ def group_granularity_case(
     # - An item does not exist in the database of the system.
     if genre not in all_means.keys():
         return [f"The genre {genre} does not exist in the database."]
-    
+
     # - None of group members has rated a comedy.
     if math.isclose(all_means[genre], 0.0):
         return [f"None of the group members have rated a {genre} movie."]
@@ -184,7 +182,7 @@ def group_granularity_case(
             f"{genre.capitalize()} is already the most common genre "
             f"in the top-{N} recommendations."
         )
-    
+
     # these explanations only apply if we aren't analyzing the most common genre
     else:
         explanations.append(
@@ -195,8 +193,8 @@ def group_granularity_case(
         topk_worst_genre = min(topk_genre_samples, key=lambda k: len(topk_genre_samples[k]))
         if topk_worst_genre == genre:
             explanations.append(f"Your group does not like {genre} movies.")
-        
-        
+
+
         ## General genre analysis
         num_of_genre_in_topk = len(topk_genre_samples[genre]) if genre in topk_genre_samples else 0
         explanations.append(
@@ -204,7 +202,7 @@ def group_granularity_case(
             f"Only {num_of_genre_in_topk} of the top-{N} recommendations are {genre} movies. "
             f"The other genres could be more suitable for the group."
         )
-    
+
         # find if extending to more recommendations (top-k+?) makes the genre the most common
         for k in range(N, ANALYSIS_LIMIT+1, 10):
             _, new_topk_genre_samples = genre_stats(movies, movie_recs, k)
@@ -227,7 +225,7 @@ def group_granularity_case(
                     is_tie = math.isclose(best_score, movies[movie].avg_rating)
                     if is_tie:
                         num_of_ties += 1
-            
+
             if len(topk_genre_samples[topk_best_genre]) == len(topk_genre_samples[genre]) - num_of_ties:
                 explanations.append(
                     f"The genre {genre} could be the most common in the "
@@ -239,7 +237,7 @@ def group_granularity_case(
     ## User analysis
     topk_last_movie_rating = movies[movie_recs[N - 1]].avg_rating
 
-    # initialize dict with user_id, where list (num_lower, num_higher) tells if 
+    # initialize dict with user_id, where list (num_lower, num_higher) tells if
     # the given score is lower/higher than the last movie of the top-k recs
     genre_movies_user_info: dict[int, list] = {}
 
@@ -248,7 +246,7 @@ def group_granularity_case(
         for user_id, rating in movies[movie_id].user_ratings.items():
             if user_id not in genre_movies_user_info:
                 genre_movies_user_info[user_id] = list(0 for _ in range(2))
-            
+
             if rating != 0:
                 if rating < topk_last_movie_rating:
                     genre_movies_user_info[user_id][0] += 1
@@ -309,7 +307,10 @@ def position_absenteeism(
         ]
     # - None of the group has rated this item
     if movie.avg_rating == 0:
-        return [f"None of the group members have rated the movie {movie.title}."]
+        return [
+            f"None of the group members have been predicted a "
+            f"score for the movie {movie.title}."
+        ]
 
     # Generate explanations.
     explanations: list[str] = []
@@ -320,22 +321,22 @@ def position_absenteeism(
             continue
         if user_score >= first_movie.avg_rating:
             explanations.append(
-                f"User {user_id} has given a high rating of {user_score:.2f} "
-                f"for the movie {movie.title}, but they could have given an "
-                "even higher rating to get the movie in the recommendations."
+                f"User {user_id} has been given a high prediction score "
+                f"of {user_score:.2f} "
+                f"for the movie {movie.title}."
             )
             continue
         if user_score == 0:
-            # - User x has no recommendations for this item
             explanations.append(
-                f"User {user_id} has not rated the movie {movie.title}. "
+                f"User {user_id} has not been given a prediction score for "
+                f"the movie {movie.title}. "
                 f"This substantially decreases the score for {movie.title}."
             )
             continue
         explanations.append(
-            f"User {user_id} hasn't given a high enough rating for "
-            f"the movie {movie.title}. "
-            f"They gave a rating of {user_score:.2f} which is lower than "
+            f"User {user_id} has not been given a high enough prediction "
+            f"score for the movie {movie.title}. "
+            f"They gave a score of {user_score:.2f} which is lower than "
             f"the first movie in the recommendations."
         )
 
@@ -376,7 +377,7 @@ def position_absenteeism(
             f"It is possible that the movie {movie.title} is simply not "
             "suitable enough to be higher on the recommendations for the "
             "group. The movie has received "
-            f"a rating of {movie.avg_rating:.2f} on average. "
+            f"a score of {movie.avg_rating:.2f} on average. "
             "The other movies could be more suitable for the group."
         )
 

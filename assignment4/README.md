@@ -27,17 +27,17 @@ Answers for atomic granularity case:
 - Error checking
   - "The movie does not exist in the database."
   - "The movie is already in the recommendations."
-  - "None of the group members have rated the movie."
+  - "None of the group members have been predicted a score for the movie."
 - User movie analysis
-  - "User has given a high rating for the movie, but they could have given an even higher rating to get the movie in the recommendations."
-  - "User has not rated the movie. This substantially decreases the movie score."
-  - "User hadn't given a high enough rating for the movie. They gave a rating of which is lower than the last movie in the recommendations."
+  - "User has been given a high prediction score for the movie."
+  - "User has not been given a prediction score for the movie. This substantially decreases the movie score."
+  - "User has not been given a high enough prediction score for the movie. They were given a score lower than the last movie in the recommendations."
 - General movie analysis
   - When movie rank is in the range $(10,100]$
     - "The movie rank is outside the group recommendations. You asked for only top 10 movies. You could consider asking top-k to get the movie in the recommendations."
   - When the movie is not in the recommendations due to a tie
     - "The movie has the same score as the last movie in the recommendations, but it was not included in the recommendations because it didn't fit in the top-10 recommendations."
-  - "It is possible that the movie is simply not suitable for the group. The movie has received a rating of r on average. The other movies could be more suitable for the group."
+  - "It is possible that the movie is simply not suitable for the group. The movie has received a score of r on average. The other movies could be more suitable for the group."
 
 ### 2. Group granularity case: Why not action movies?
 
@@ -50,9 +50,9 @@ Answers for group granularity case:
 - Error checking
   - "The genre does not exist in the database."
   - "The genre is already the most common genre in the recommendations."
-  - "None of the group members have rated a movie of the genre."
+  - "None of the group members have been predicted a score for the genre."
 - User genre analysis
-  <!-- - TODO: Sophie
+  <!-- - TODO: Sophie. Muista myös päivittää rating -> prediction score yms.
   - "User has given a high rating for movies of this genre, but they could have given an even higher rating to get more movies of the genre in the recommendations."
   - "User has not rated a movie of this genre."
   - "User X hasn't given a high enough rating for movies of this genre. They gave a rating of which is lower than the last movie in the recommendations." -->
@@ -80,18 +80,18 @@ Answers for position absenteeism:
   - "The movie does not exist in the database."
   - "Can't answer why the movie isn't higher in the recommendations because the movie is not in the recommendations. Use the atomic granularity case instead."
   - "The movie is already the highest in the recommendations."
-  - "None of the group members have rated the movie."
+  - "None of the group members have been predicted a score for the movie."
 - User movie analysis
-  - "User has given a high rating for the movie, but they could have given an even higher rating to get the movie in the recommendations."
-  - "User has not rated the movie. This substantially decreases the movie score."
-  - "User hadn't given a high enough rating for the movie. They gave a rating which is lower than the first movie in the recommendations."
+  - "User has been given a high prediction score for the movie."
+  - "User has not been given a prediction score for the movie. This substantially decreases the movie score."
+  - "User has not been given a high enough prediction score for the movie. They gave a score lower than the first movie in the recommendations."
 - Group genre analysis
   - When the movie genre is not the most common genres in the recommendations
     - "Your group prefers the following genres: [list of genres], but the movie is of the following genres: [list of genres]."
 - General movie analysis
   - When the movie is not higher in the recommendations due to a tie
     - "The movie has the same score as another movie in the recommendations. The movie was not higher in the recommendations because the order is not defined for movies with the same score."
-  - "It is possible that the movie is simply not suitable enough to be higher on the recommendations for the group. The movie has received a rating of r on average. The other movies could be more suitable for the group."
+  - "It is possible that the movie is simply not suitable enough to be higher on the recommendations for the group. The movie has received a score of r on average. The other movies could be more suitable for the group."
 
 ## Results
 
