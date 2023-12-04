@@ -50,7 +50,7 @@ General analysis is used to check general reasons why the item is not in the rec
 
 We use this explanation engine for movies that are not in the top-10 group recommendations.
 
-The explanation engine contains error checking, user movie analysis, and general movie analysis.
+The explanation engine is specialized in movie analyses and contains error checking, user movie analysis, and general movie analysis.
 
 We will next present the answers of the explanation engine in a list format. We include when-conditions if they are needed. Otherwise, we will omit them when the meaning can be understood without them. *For example, the explanation "The movie does not exist in the database." does not need an explicit condition of "When movie does not exist in the database" since it is already clear from the explanation.*
 
@@ -75,7 +75,7 @@ Answers for atomic granularity case:
 
 We use this explanation engine for genres that are not the most common in the group recommendations.
 
-This explanation engine contains error checking, user genre analysis, group genre analysis, and general genre analysis.
+This explanation engine is specialized in genre analyses and contains error checking, user genre analysis, group genre analysis, and general genre analysis.
 
 Answers for group granularity case:
 
@@ -104,7 +104,7 @@ Answers for group granularity case:
 
 We use this explanation engine for movies that are in the top-10 group recommendations.
 
-This explanation engine is mostly the same as the atomic granularity case, but we also include group genre analysis to give the user a more in-depth explanation of why the movie is not higher in the recommendations.
+This explanation engine is specialized in both movie and genre analyses and contains error checking, user movie analysis, group genre analysis, and general movie analysis. The explanation engine is mostly the same as the atomic granularity case, but we also include group genre analysis to give the user a more in-depth explanation of why the movie is not higher in the recommendations.
 
 We think that a more in-depth explanation is needed for movies that are already in the recommendations because the user might want to know the small details and possible explanation when asking this specific question.
 
