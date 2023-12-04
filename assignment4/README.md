@@ -198,6 +198,7 @@ from each of the above cases and report the corresponding explanations (Score: 1
 The overall results are compiled with the `assignment4/assignment4.py/main` function.
 
 ```txt
+
 ## Top-10 Average Recommendations for Group [233, 9, 242] ##
 
   Rank    Movie ID  Title                                                        Average Rating
@@ -224,16 +225,17 @@ Why wasn't movie Matrix, The (1999) in the recommendation?
 
 Why not more romance movies?
 1. Your group prefers drama movies. This could be the reason why romance movies are not in the recommendations.
-2. It is possible that the genre is simply not suitable for the group. Only 2 of the top-10 recommendations are romance movies. The other genres could be more suitable for the group.
+2. It is possible that the genre is simply not suitable for the group. Only 2 of the top-10 recommendations
+are romance movies. The other genres could be more suitable for the group.
 3. User 233 hasn't been given high enough predicted scores for romance movies. They have been given 7 predicted scores which are smaller than the last movie in the top-10 recommendations received.
 4. User 9 hasn't been given high enough predicted scores for romance movies. They have been given 10 predicted scores which are smaller than the last movie in the top-10 recommendations received.
 5. User 242 hasn't been given high enough predicted scores for romance movies. They have been given 6 predicted scores which are smaller than the last movie in the top-10 recommendations received.
 
 Why not rank Fargo (1996) first?
-1. User 9 has not been given a high enough prediction score for the movie Fargo (1996). They gave a score of 3.96 which is lower than the first movie in the recommendations.
-2. User 242 has not been given a high enough prediction score for the movie Fargo (1996). They gave a score of 4.06 which is lower than the first movie in the recommendations.
-3. User 233 has not been given a high enough prediction score for the movie Fargo (1996). They gave a score of 4.57 which is lower than the first movie in the recommendations.
-4. Your group prefers the following genres: thriller, crime, drama, romance, but the movie Fargo (1996) is of the following genres: comedy, crime, drama, thriller.
+1. User 9 has not been given a high enough prediction score for the movie Fargo (1996). They were given a score of 3.96 which is lower than the first movie in the recommendations.
+2. User 242 has not been given a high enough prediction score for the movie Fargo (1996). They were given a score of 4.06 which is lower than the first movie in the recommendations.
+3. User 233 has not been given a high enough prediction score for the movie Fargo (1996). They were given a score of 4.57 which is lower than the first movie in the recommendations.
+4. Your group prefers the following genres: thriller, drama, crime, romance, but the movie Fargo (1996) is of the following genres: comedy, crime, drama, thriller.
 5. It is possible that the movie Fargo (1996) is simply not suitable enough to be higher on the recommendations for the group. The movie has received a score of 4.20 on average. The other movies could be more suitable for the group.
 ```
 
