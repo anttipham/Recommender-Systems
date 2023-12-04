@@ -63,8 +63,6 @@ def atomic_granularity_case(
     # User movie analysis
     last_movie = movies[movie_recs[N - 1]]
     for user_id, user_score in movie.user_ratings.items():
-        if user_score == 5.0:
-            continue
         if user_score >= last_movie.avg_rating:
             explanations.append(
                 f"User {user_id} has given a high prediction score of "
@@ -222,7 +220,7 @@ def group_granularity_case(
         # check for tie: does it effect the most common genre
         topk_last_rating = movies[movie_recs[N - 1]].avg_rating
         replaced_movie_recs = movie_recs.copy()
-        
+
         # find the indices of the tied movies (both before and after last)
         start_i = None
         for i in range(0, ANALYSIS_LIMIT):
@@ -230,7 +228,7 @@ def group_granularity_case(
                 if not start_i:
                     start_i = i
                 end_i = i
-        
+
         # movies in the genre that have tied with the last movie in the top-k
         all_tied = set(replaced_movie_recs[start_i:end_i])
         genre_movies = set(analysis_genre_samples[genre])
@@ -252,7 +250,7 @@ def group_granularity_case(
             )
 
     ## User analysis
-    # initialize dict with user_id, where list (num_lower, num_higher) tells if 
+    # initialize dict with user_id, where list (num_lower, num_higher) tells if
     # the given score is lower/higher than the last movie of the top-k recs
     genre_movies_user_info: dict[int, list[float]] = {}
 
@@ -332,8 +330,6 @@ def position_absenteeism(
     # User movie analysis
     first_movie = movies[movie_recs[0]]
     for user_id, user_score in sorted(movie.user_ratings.items(), key=lambda x: x[1]):
-        if user_score == 5.0:
-            continue
         if user_score >= first_movie.avg_rating:
             explanations.append(
                 f"User {user_id} has been given a high prediction score "
@@ -351,7 +347,7 @@ def position_absenteeism(
         explanations.append(
             f"User {user_id} has not been given a high enough prediction "
             f"score for the movie {movie.title}. "
-            f"They gave a score of {user_score:.2f} which is lower than "
+            f"They were given a score of {user_score:.2f} which is lower than "
             f"the first movie in the recommendations."
         )
 

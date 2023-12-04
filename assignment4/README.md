@@ -82,15 +82,18 @@ Answers for atomic granularity case:
 
 - Error checking
   - "The movie does not exist in the database."
-  - "The movie is already in the recommendations."
+  - "The movie is already in the top-k recommendations."
   - "None of the group members have been predicted a score for the movie."
 - User movie analysis
-  - "User has been given a high prediction score for the movie."
+  - When the prediction score is higher than the last movie in the top-k recommendations
+    - "User has been given a high prediction score for the movie."
   - "User has not been given a prediction score for the movie. This substantially decreases the movie score."
-  - "User has not been given a high enough prediction score for the movie. They were given a score lower than the last movie in the recommendations."
+    - This is due to assumption that missing values are replaced by 0.
+  - When the prediction score is lower than the last movie in the top-k recommendations
+    - "User has not been given a high enough prediction score for the movie. They were given a score lower than the last movie in the recommendations."
 - General movie analysis
-  - When movie rank is in the range $(10,100]$
-    - "The movie rank is outside the group recommendations. You asked for only top 10 movies. You could consider asking top-k to get the movie in the recommendations."
+  - When movie rank is in the range $(10,100]$ (ANALYSIS_LIMIT is 100)
+    - "The movie rank is outside the group recommendations. You asked for only top 10 movies. You could consider asking top-{insert movie rank} to get the movie in the recommendations."
   - When the movie is not in the recommendations due to a tie
     - "The movie has the same score as the last movie in the recommendations, but it was not included in the recommendations because it didn't fit in the top-10 recommendations."
   - "It is possible that the movie is simply not suitable for the group. The movie has received a score of r on average. The other movies could be more suitable for the group."
@@ -170,9 +173,11 @@ Answers for position absenteeism:
   - "The movie is already the highest in the recommendations."
   - "None of the group members have been predicted a score for the movie."
 - User movie analysis
-  - "User has been given a high prediction score for the movie."
+  - When the prediction score is higher than the first movie in the top-k recommendations
+    - "User has been given a high prediction score for the movie."
   - "User has not been given a prediction score for the movie. This substantially decreases the movie score."
-  - "User has not been given a high enough prediction score for the movie. They gave a score lower than the first movie in the recommendations."
+  - When the prediction score is lower than the first movie in the top-k recommendations
+    - "User has not been given a high enough prediction score for the movie. They were given a prediction score which is lower than the first movie in the recommendations."
 - Group genre analysis
   - When the movie genre is not the most common genres in the recommendations
     - "Your group prefers the following genres: [list of genres], but the movie is of the following genres: [list of genres]."
