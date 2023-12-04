@@ -118,22 +118,22 @@ def atomic_granularity_case(
     return explanations
 
 
-# TODO: Sophie. Kirjoitin jotain. Voit käyttää tai poistaa, jos haluat
-def all_genres(movies: dict[int, Movie]) -> set[str]:
-    """
-    Returns a set of all genres in the movie database.
-
-    Args:
-        movies (dict[int, Movie]): Movie dictionary where key is movie_id and
-            value is Movie object.
-
-    Returns:
-        set[str]: Set of all genres in the movie database.
-    """
-    genres: set[str] = set()
-    for movie in movies.values():
-        genres.update(movie.genres)
-    return genres
+# def get_all_genres(movies: dict[int, Movie]) -> set[str]:
+#     """
+#     Returns a set of all genres in the movie database.
+# 
+#     Args:
+#         movies (dict[int, Movie]): Movie dictionary where key is movie_id and
+#             value is Movie object.
+# 
+#     Returns:
+#         set[str]: Set of all genres in the movie database.
+#     """
+# 
+#     genres: set[str] = set()
+#     for movie in movies.values():
+#         genres.update(movie.genres)
+#     return genres
 
 
 def genre_statistics(
@@ -149,8 +149,10 @@ def genre_statistics(
         tuple[dict[str, float], dict[str, int]]: Mean scores and samples
                                                     for each genre.
     """
+
     scores: dict[str, float] = {}
     samples: dict[str, int] = {}
+
     for movie_id in movie_recs[:limit]:
         for genre in movies[movie_id].genres:
             if genre not in scores:
@@ -160,6 +162,7 @@ def genre_statistics(
 
             scores[genre] += movies[movie_id].avg_rating
             samples[genre] += 1
+    
     mean_scores = {genre: scores[genre] / samples[genre] for genre in scores}
     return mean_scores, samples
 
@@ -180,29 +183,33 @@ def group_granularity_case(
         genre (str): Genre to analyze.
     """
 
-    # TODO: Sophie. Kirjoitin jotain. Voit käyttää tai poistaa, jos haluat
-
-
     # Top movies by the genre
-    mean_genre_scores, genre_samples = genre_statistics(movies, movie_recs, N)
-    all_mean_genre_scores, _ = genre_statistics(movies, movie_recs, len(movie_recs))
+    topk_means, topk_genre_samples = genre_statistics(movies, movie_recs, N)
+    all_means, _ = genre_statistics(movies, movie_recs, len(movie_recs))
 
-    # Error checking.
+    ## Error checking
     # - An item does not exist in the database of the system.
-    if genre not in all_genres(movies):
+    if genre not in all_means.keys():
         return [f"The genre {genre} does not exist in the database."]
     
     # - Item is already in the recommendations.
-    max_samples = max(genre_samples.values())
-    if genre_samples[genre] == max_samples:
-        return [
-            f"The genre {genre} is already the most common genre "
-            "in the recommendations."
-        ]
+    if genre in topk_genre_samples:
+        max_samples = max(topk_genre_samples.values())
+        if topk_genre_samples[genre] == max_samples:
+            return [
+                f"The genre {genre} is already the most common genre "
+                "in the recommendations."
+            ]
     
     # - None of group members has rated a comedy.
-    if all_mean_genre_scores[genre] == 0.0:
+    if all_means[genre] == 0.0:
         return [f"None of the group members have rated a {genre} movie."]
+
+    ## Generate explanations
+    explanations: list[str] = []
+
+
+    return explanations
 
     """
     # NOTE only movies with avg_rating >= 3 are valid recommendations
