@@ -214,6 +214,52 @@ def group_granularity_case(
     if topk_worst_genre == genre:
         explanations.append(f"Your group does not like {genre} movies.")
 
+    ## General genre analysis
+    topk_of_genre = len(topk_genre_samples[genre]) if genre in topk_genre_samples else 0
+    explanations.append(
+        f"It is possible that the genre is simply not suitable for the group. "
+        f"Only {topk_of_genre} of the top-{N} recommendations are {genre} movies."
+        f"The other genres could be more suitable for the group."
+    )
+
+    # size of top-k: does extending make it the most common?
+    if genre not in topk_genre_samples:
+
+        # find if extending to more recommendations makes it the most common
+        for k in range(N, ANALYSIS_LIMIT+1, 10):
+            _, new_topk_genre_samples = genre_statistics(movies, movie_recs, k)
+            new_topk_best_genre = max(new_topk_genre_samples, key=lambda k: len(new_topk_genre_samples[k]))
+            if genre == new_topk_best_genre:
+                explanations.append(
+                    f"The genre {genre} is the most common when the "
+                    f"recommendations are extended to top-{k}. "
+                    f"You asked for too few movies (top-{N}). "
+                )
+                break
+
+    # genre is in top-k recommendations
+    # find if there is a tie (same movie scores)
+    else:
+        num_of_ties = 0
+        for best_movie in topk_genre_samples[topk_best_genre]:
+            best_score = movies[best_movie].avg_rating
+
+            for movie in analysis_genre_samples[genre]:
+                is_tie = math.isclose(best_score, movies[movie].avg_rating)
+                if is_tie:
+                    num_of_ties += 1
+        
+        if len(topk_genre_samples[topk_best_genre]) == len(topk_genre_samples[genre]) - num_of_ties:
+            explanations.append(
+                f"The genre {genre} could be the most common in the "
+                f"recommendations, but it is not because the order "
+                f"is not defined for movies with the same score."
+            )
+
+
+    ## User analysis
+    # TODO
+
 
     return explanations
 
