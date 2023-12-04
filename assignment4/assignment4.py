@@ -174,7 +174,7 @@ def group_granularity_case(
 
     # - None of group members has rated a comedy.
     if math.isclose(all_means[genre], 0.0):
-        return [f"None of the group members have rated a {genre} movie."]
+        return [f"None of the group members have been recommended a {genre} movie."]
 
     # Generate explanations
     explanations: list[str] = []
@@ -221,7 +221,7 @@ def group_granularity_case(
 
         # check for tie: does it effect the most common genre
         topk_last_rating = movies[movie_recs[N - 1]].avg_rating
-        replaced_movie_recs = movie_recs.copy()[:ANALYSIS_LIMIT]
+        replaced_movie_recs = movie_recs.copy()
         
         # find the indices of the tied movies (both before and after last)
         start_i = None
@@ -254,7 +254,7 @@ def group_granularity_case(
     ## User analysis
     # initialize dict with user_id, where list (num_lower, num_higher) tells if 
     # the given score is lower/higher than the last movie of the top-k recs
-    genre_movies_user_info: dict[int, list] = {}
+    genre_movies_user_info: dict[int, list[float]] = {}
 
     # Compile information about user ratings for movies of this genre
     for movie_id in analysis_genre_samples[genre]:
@@ -274,14 +274,14 @@ def group_granularity_case(
             explanations.append(f"User {user_id} has not rated a {genre} movie.")
         elif num_higher > num_lower:
             explanations.append(
-                f"User {user_id} has given {num_higher} high ratings for "
-                f"{genre} movies, but they could have given an even higher "
-                f"ratings to get more {genre} movies in the top-{N} recommendations."
+                f"User {user_id} has been given {num_higher} high predicted scores for "
+                f"{genre} movies, but they could have given even higher "
+                f"predicted scores to get more {genre} movies in the top-{N} group recommendations."
             )
         else:
             explanations.append(
-                f"User {user_id} hasn't given high enough ratings for {genre} "
-                f"movies. They gave {num_lower} ratings which are smaller "
+                f"User {user_id} hasn't been given high enough predicted scores for {genre} "
+                f"movies. They have been given {num_lower} predicted scores which are smaller "
                 f"than the last movie in the top-{N} recommendations received."
             )
 

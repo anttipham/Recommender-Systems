@@ -10,6 +10,10 @@
   - All applicable assumptions from previous assingments are assumed, please see their `README.md` files if necessary.
 
 ## Running the script
+- We suggest creating a conda environment from the `assignment4/requirements.txt` file:
+  ```
+  conda create --name your_env_name --file requirements.txt
+  ```
 
 - User needs to provide path to the MovieLens 100K ratings dataset when calling the script. Call the script inside the `assignment4` directory. Usage:
 
@@ -17,7 +21,7 @@
   python assignment4.py <path/to/ml-latest-small/>
   ```
 
-  ml-latest-small is the directory containing the ratings.csv and movies.csv files.
+  ml-latest-small is the directory containing the `ratings.csv` and `movies.csv` files.
 
 - We print all results to console output straight from `main`. To change the input parameters (user group members etc.), please see the following global variables in `assignment4.py`
 
@@ -44,9 +48,26 @@ Error checking is used to check if the input is valid. For example, if the movie
 
 User movie and genre analyses is used to check if the individual users have rated the item high enough to get the item in the recommendations.
 
-Group genre analysis is used to check the group preference.
+Group genre analysis is used to check the group preferences.
 
 General analysis is used to check general reasons why the item is not in the recommendations. For example, the item could be outside the top-10 recommendations due to a tie, or the analysis could recommend the user to ask for a bigger recommendation list etc.
+
+In the beginning of the script, the dataset is loaded appropriately from the `ratings.csv` and `movies.csv` files. It is loaded into a helper `movie` class containing the necessary information explained simplified below:
+``` python
+class Movie:
+  self.movie_id = movie_id
+  self.title = title
+  self.genres = genres
+
+  # initialize also variables to be updated later on
+  # a dict with the user_id, movie_rating for each user for this movie
+  self.user_ratings: dict[int, float] = {}
+
+  # the average aggregated group ratings for this movie
+  self.avg_rating: float = None
+```
+
+Group recommendations are handled as lists of movie_id ints, and the movie objects are stored in a Python `dict[int, Movie]`
 
 ### 1. Atomic granularity case: Why not Matrix?
 
@@ -73,34 +94,62 @@ Answers for atomic granularity case:
     - "The movie has the same score as the last movie in the recommendations, but it was not included in the recommendations because it didn't fit in the top-10 recommendations."
   - "It is possible that the movie is simply not suitable for the group. The movie has received a score of r on average. The other movies could be more suitable for the group."
 
-### 2. Group granularity case: Why not action movies?
+### 2. Group granularity case: Why not romance movies?
 
-We use this explanation engine for genres that are not the most common in the group recommendations.
+We use this explanation engine for various genres in the dataset. This can include analysis regarding genres that are either most or least commmon, or somewhere in between. 
+
+The concept of "most common" has been defined as the number of movies in the top-k (or other division) group movie recommendations. This split is done by processing the genres from file `movies.csv` and matching them with the movies and ratings for users from the `ratings.csv` file.
 
 This explanation engine is specialized in genre analyses and contains error checking, user genre analysis, group genre analysis, and general genre analysis.
 
-Answers for group granularity case:
+Answers for group granularity case questions.
 
 - Error checking
-  - "The genre does not exist in the database."
-  - "The genre is already the most common genre in the recommendations."
-  - "None of the group members have been predicted a score for the genre."
+  - No movie of this genre is anywhere in the dataset.
+    - "The genre does not exist in the database."
+  - The mean rating for this genre is 0.
+    - "None of the group members have been predicted a score for the genre."
+
 - User genre analysis
-  <!-- - TODO: Sophie. Muista myös päivittää rating -> prediction score yms.
-  - "User has given a high rating for movies of this genre, but they could have given an even higher rating to get more movies of the genre in the recommendations."
-  - "User has not rated a movie of this genre."
-  - "User X hasn't given a high enough rating for movies of this genre. They gave a rating of which is lower than the last movie in the recommendations." -->
+  - This includes going over the top-k movies ana a
+  - "User has not rated a movie of this genre"
+  - "User has been given  high predicted scores for movies of this genre, but they could have given even higher predicted scores to get more movies of this genre in the top-k group recommendations."
+  - "User hasn't been given high enough predicted scores for movies of the given genre. They have been given X predicted scores which are smaller than the last movie in the top-k recommendations received."
+
 - Group genre analysis
-  - "Your group prefers genre X, but the movie genre is Y."
-  <!-- TODO: Sophie. Jätetään tämä pois? Tän vois yhdistää yllä olevan rivin kanssa.
-  - When the genre is the least common in the recommendations
-    - "Your group dislikes the genre." -->
+  - This includes checking for the most and least common genres in the top-k recommendations. These are then concidered the 'best' and 'worst' genres in the analysis.
+  - If the genre is already the most common amongst the top-k recommendations, we report this to the user.
+    - "Genre X is already the most common genre in the top-k recommendations."
+  - If the genre is the least common, report this.
+    - "Your group does not like movies from genre X."
+  - "Your group prefers movies from genre X. This could be the reason why movies from genre Y are not in the recommendations."
+
 - General genre analysis
+  - This includes more broad explanations.
   - When extending the recommendations to top-k makes the genre the most common
     - "The genre is the most common when the recommendations are extended to top-k. You could consider asking top-k recommendations to get more movies of the genre in the recommendations."
   - When the genre is not the most common in the recommendations due to a tie
     - "The genre could be the most common in the recommendations, but it is not because the order is not defined for movies with the same score."
   - "It is possible that the genre is simply not suitable for the group. There are x movies of this genre in the group recommendation. The other genres could be more suitable for the group."
+
+Analysis of a group granularity question is implemented in the `assignment4/assignment4.py/group_granularity_case` function. The function follows this overall logic:
+1. Split movies into their genres. Get these `dict[genre, list[movie_id]] for all top-k, analysis_limit and all recommendations.
+
+2. Perform error handling.  
+  2.1 If movies of this genre do not exist in the database, return.  
+  2.2 No one has abeen recommended a movie of this genre, return.  
+
+3. Group analysis
+  3.1 Find most common genre from dict 
+  3.2 Find least commmon genre from the dict
+
+4. General genre analysis  
+  4.1 For k values between current k and `ANALYSIS_LIMIT` loop and find if extending k would make the genre more common.  
+  4.2 Find the movies tied for near the end of `k`, and see if rearranging by genre would make it more common.
+
+5. User analysis  
+  5.1 For movies in the genre, find user specific predicted ratings. Compare these to the last movie that made the top-k list.
+
 
 ### 3. Position absenteeism: Why not rank Matrix first?
 
@@ -135,6 +184,8 @@ Produce a group of 3 users, and for this group, show the top-10 recommendations,
 the 10 movies with the highest prediction scores, using the MovieLens 100K rating
 dataset. Given this recommendation list, take as input one why-not question example
 from each of the above cases and report the corresponding explanations (Score: 10%).
+
+The overall results are compiled with the `assignment4/assignment4.py/main` function.
 
 ```txt
 ## Top-10 Average Recommendations for Group [233, 9, 242] ##
