@@ -203,6 +203,17 @@ def group_granularity_case(
     # Generate explanations
     explanations: list[str] = []
 
+    ## Group analysis
+    topk_best_genre = max(topk_genre_samples, key=lambda k: len(topk_genre_samples[k]))
+    explanations.append(
+        f"Your group prefers {topk_best_genre} movies. This could be the "
+        f"reason why {genre} movies are not in the recommendations."
+    )
+
+    topk_worst_genre = min(topk_genre_samples, key=lambda k: len(topk_genre_samples[k]))
+    if topk_worst_genre == genre:
+        explanations.append(f"Your group does not like {genre} movies.")
+
 
     return explanations
 
