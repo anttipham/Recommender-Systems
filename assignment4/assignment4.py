@@ -119,49 +119,49 @@ def atomic_granularity_case(
 
 
 # TODO: Sophie. Kirjoitin jotain. Voit käyttää tai poistaa, jos haluat
-# def all_genres(movies: dict[int, Movie]) -> set[str]:
-#     """
-#     Returns a set of all genres in the movie database.
+def all_genres(movies: dict[int, Movie]) -> set[str]:
+    """
+    Returns a set of all genres in the movie database.
 
-#     Args:
-#         movies (dict[int, Movie]): Movie dictionary where key is movie_id and
-#             value is Movie object.
+    Args:
+        movies (dict[int, Movie]): Movie dictionary where key is movie_id and
+            value is Movie object.
 
-#     Returns:
-#         set[str]: Set of all genres in the movie database.
-#     """
-#     genres: set[str] = set()
-#     for movie in movies.values():
-#         genres.update(movie.genres)
-#     return genres
+    Returns:
+        set[str]: Set of all genres in the movie database.
+    """
+    genres: set[str] = set()
+    for movie in movies.values():
+        genres.update(movie.genres)
+    return genres
 
 
-# def genre_statistics(
-#     movies: dict[int, Movie],
-#     movie_recs: list[int],
-#     limit: int,
-# ) -> tuple[dict[str, float], dict[str, int]]:
-#     """
-#     Args:
-#         limit (int): Cut-off limit of the movie_recs list.
+def genre_statistics(
+    movies: dict[int, Movie],
+    movie_recs: list[int],
+    limit: int,
+) -> tuple[dict[str, float], dict[str, int]]:
+    """
+    Args:
+        limit (int): Cut-off limit of the movie_recs list.
 
-#     Returns:
-#         tuple[dict[str, float], dict[str, int]]: Mean scores and samples
-#                                                     for each genre.
-#     """
-#     scores: dict[str, float] = {}
-#     samples: dict[str, int] = {}
-#     for movie_id in movie_recs[:limit]:
-#         for genre in movies[movie_id].genres:
-#             if genre not in scores:
-#                 scores[genre] = 0.0
-#             if genre not in samples:
-#                 samples[genre] = 0
+    Returns:
+        tuple[dict[str, float], dict[str, int]]: Mean scores and samples
+                                                    for each genre.
+    """
+    scores: dict[str, float] = {}
+    samples: dict[str, int] = {}
+    for movie_id in movie_recs[:limit]:
+        for genre in movies[movie_id].genres:
+            if genre not in scores:
+                scores[genre] = 0.0
+            if genre not in samples:
+                samples[genre] = 0
 
-#             scores[genre] += movies[movie_id].avg_rating
-#             samples[genre] += 1
-#     mean_scores = {genre: scores[genre] / samples[genre] for genre in scores}
-#     return mean_scores, samples
+            scores[genre] += movies[movie_id].avg_rating
+            samples[genre] += 1
+    mean_scores = {genre: scores[genre] / samples[genre] for genre in scores}
+    return mean_scores, samples
 
 
 def group_granularity_case(
@@ -181,24 +181,30 @@ def group_granularity_case(
     """
 
     # TODO: Sophie. Kirjoitin jotain. Voit käyttää tai poistaa, jos haluat
-    # # Top movies by the genre
-    # mean_genre_scores, genre_samples = genre_statistics(movies, movie_recs, N)
-    # all_mean_genre_scores, _ = genre_statistics(movies, movie_recs, len(movie_recs))
-    # # Error checking.
-    # # - An item does not exist in the database of the system.
-    # if genre not in all_genres(movies):
-    #     return [f"The genre {genre} does not exist in the database."]
-    # # - Item is already in the recommendations.
-    # max_samples = max(genre_samples.values())
-    # if genre_samples[genre] == max_samples:
-    #     return [
-    #         f"The genre {genre} is already the most common genre "
-    #         "in the recommendations."
-    #     ]
-    # # - None of group members has rated a comedy.
-    # if all_mean_genre_scores[genre] == 0.0:
-    #     return [f"None of the group members have rated a {genre} movie."]
 
+
+    # Top movies by the genre
+    mean_genre_scores, genre_samples = genre_statistics(movies, movie_recs, N)
+    all_mean_genre_scores, _ = genre_statistics(movies, movie_recs, len(movie_recs))
+
+    # Error checking.
+    # - An item does not exist in the database of the system.
+    if genre not in all_genres(movies):
+        return [f"The genre {genre} does not exist in the database."]
+    
+    # - Item is already in the recommendations.
+    max_samples = max(genre_samples.values())
+    if genre_samples[genre] == max_samples:
+        return [
+            f"The genre {genre} is already the most common genre "
+            "in the recommendations."
+        ]
+    
+    # - None of group members has rated a comedy.
+    if all_mean_genre_scores[genre] == 0.0:
+        return [f"None of the group members have rated a {genre} movie."]
+
+    """
     # NOTE only movies with avg_rating >= 3 are valid recommendations
     # for the explanations for the why-not questions.
     # other movies are considered to not be recommendations at all
@@ -263,6 +269,7 @@ def group_granularity_case(
         f"{len(genre_not_in_top10)} {genre} movies were rated lower by "
         f"similar users compared to the recommended top-{N} movies."
     )
+    """
 
     """ Irrelevant?
     # find genres of top-10 movies
@@ -274,9 +281,10 @@ def group_granularity_case(
     # compile answers to "why not more {genre} movies?"
     answers.append(f"Only {top10_genres[genre]}/{top10_genres.total()} of the Top-{N} movies are {genre} movies.")
     answers.append(f"The group prefers {top10_genres.most_common(1)[0][0]} movies.")
-    """
+    
 
     return answers
+    """
 
 
 def position_absenteeism(
