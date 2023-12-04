@@ -43,8 +43,8 @@
   MOVIE_ABSENTEEISM = "Fargo (1996)"
   ```
 
-  - Analysis limit is used in some of the explanation engine logic to limit all recommendations from all movies, yet have more than 10 movies to analyze.
-  - Since we don't perform natural language processing, as it is beyond the scope of the course, the items why-not questions are asked about are given with global variables defined above.
+  - Analysis limit is used in some of the explanation engine logic to limit the number of recommendations from all movie recommendations. It functions as a threshold for us to analyze more than 10 movies.
+  - Since we don't perform natural language processing, as it is beyond the scope of the course, the items why-not questions are asked with global variables defined above.
 
 ## Design (Score: 40%) and implement (Score: 40%) methods for producing explanations for group recommendations for the granularity case
 
