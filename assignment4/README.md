@@ -2,9 +2,10 @@
 
 ## Implementation Details and Assumptions
 
+- Missing prediction scores are replaced by a value of 0 in our implementation.
 - All assumptions made in the implementation details for previous assigments apply, since their code is reused. This includes the following:
-  - The prediction function can give a rating over 5. This is not a mistake, but a property of the prediction formula adding and subtracting the biases (movie mean ratings) of the users. 
-  - Pearson correlation is used for calculating the similarity between users in the user-based filtering. 
+  - The prediction function can give a rating over 5. This is not a mistake, but a property of the prediction formula adding and subtracting the biases (movie mean ratings) of the users.
+  - Pearson correlation is used for calculating the similarity between users in the user-based filtering.
   - Movies that some users have already seen can still be recommended to the group if the aggregation methods deems them to be best matches. This is based on the idea that a group member is open to seeing a movie again if everyone else is satisfied with the recommendation, and they liked it.
   - Aggregation methods (average) use either real or predicted ratings for movies when aggregating group recommendations. This is due to many gaps in the dataset (users have often only rated a few movies). Now we can still concider their preferences when performing the group aggregation.
   - All applicable assumptions from previous assingments are assumed, please see their `README.md` files if necessary.
@@ -44,9 +45,9 @@
 
 Our explanation engines (atomic granularity, group granularity, and position absenteeism) are composed from the following categories: error checking, user movie analysis, user genre analysis, group genre analysis, and general analysis.
 
-Error checking is used to check if the input is valid. For example, if the movie does not exist in the database, we can't answer why the movie is not in the recommendations. We also check if the movie is already in the recommendations, or if none of the group members have rated the item etc.
+Error checking is used to check if the input is valid. For example, if the movie does not exist in the database, we can't answer why the movie is not in the recommendations. We also check if the movie is already in the recommendations, or if none of the group members have been given a prediction score for the item etc.
 
-User movie and genre analyses is used to check if the individual users have rated the item high enough to get the item in the recommendations.
+User movie and genre analyses is used to check if the individual users have been given a prediction score for the item high enough to get the item in the recommendations.
 
 Group genre analysis is used to check the group preferences.
 
@@ -94,9 +95,11 @@ Answers for atomic granularity case:
     - "The movie has the same score as the last movie in the recommendations, but it was not included in the recommendations because it didn't fit in the top-10 recommendations."
   - "It is possible that the movie is simply not suitable for the group. The movie has received a score of r on average. The other movies could be more suitable for the group."
 
+This explanation engine is implemented in the `assignment4/assignment4.py/atomic_granularity_case` function.
+
 ### 2. Group granularity case: Why not romance movies?
 
-We use this explanation engine for various genres in the dataset. This can include analysis regarding genres that are either most or least commmon, or somewhere in between. 
+We use this explanation engine for various genres in the dataset. This can include analysis regarding genres that are either most or least commmon, or somewhere in between.
 
 The concept of "most common" has been defined as the number of movies in the top-k (or other division) group movie recommendations. This split is done by processing the genres from file `movies.csv` and matching them with the movies and ratings for users from the `ratings.csv` file.
 
@@ -107,13 +110,13 @@ Answers for group granularity case questions.
 - Error checking
   - No movie of this genre is anywhere in the dataset.
     - "The genre does not exist in the database."
-  - The mean predicted score for this genre is 0.
+  - The mean predicted score for this genre is 0 (Our assumption include that missing values are replaced by 0).
     - "None of the group members have been predicted a score for the genre."
 
 - User genre analysis
   - This includes going over the top-k movies ana a
-  - "User has not rated a movie of this genre"
-  - "User has been given  high predicted scores for movies of this genre, but they could have given even higher predicted scores to get more movies of this genre in the top-k group recommendations."
+  - "User has not been given a prediction for a movie of this genre"
+  - "User has been given high predicted scores for movies of this genre, but they could have given even higher predicted scores to get more movies of this genre in the top-k group recommendations."
   - "User hasn't been given high enough predicted scores for movies of the given genre. They have been given X predicted scores which are smaller than the last movie in the top-k recommendations received."
 
 - Group genre analysis
@@ -135,19 +138,19 @@ Answers for group granularity case questions.
 Analysis of a group granularity question is implemented in the `assignment4/assignment4.py/group_granularity_case` function. The function follows this overall logic:
 1. Split movies into their genres. Get these `dict[genre, list[movie_id]] for all top-k, analysis_limit and all recommendations.
 
-2. Perform error handling.  
-  2.1 If movies of this genre do not exist in the database, return.  
-  2.2 No one has abeen recommended a movie of this genre, return.  
+2. Perform error handling.
+  2.1 If movies of this genre do not exist in the database, return.
+  2.2 No one has abeen recommended a movie of this genre, return.
 
 3. Group analysis
-  3.1 Find most common genre from dict 
+  3.1 Find most common genre from dict
   3.2 Find least commmon genre from the dict
 
-4. General genre analysis  
-  4.1 For k values between current k and `ANALYSIS_LIMIT` loop and find if extending k would make the genre more common.  
+4. General genre analysis
+  4.1 For k values between current k and `ANALYSIS_LIMIT` loop and find if extending k would make the genre more common.
   4.2 Find the movies tied for near the end of `k`, and see if rearranging by genre would make it more common.
 
-5. User analysis  
+5. User analysis
   5.1 For movies in the genre, find user specific predicted scores. Compare these to the last movie that made the top-k list.
 
 
@@ -177,6 +180,8 @@ Answers for position absenteeism:
   - When the movie is not higher in the recommendations due to a tie
     - "The movie has the same score as another movie in the recommendations. The movie was not higher in the recommendations because the order is not defined for movies with the same score."
   - "It is possible that the movie is simply not suitable enough to be higher on the recommendations for the group. The movie has received a score of r on average. The other movies could be more suitable for the group."
+
+This explanation engine is implemented in the `assignment4/assignment4.py/position_absenteeism` function.
 
 ## Results
 
