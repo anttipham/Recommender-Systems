@@ -116,24 +116,6 @@ def atomic_granularity_case(
     return explanations
 
 
-# def get_all_genres(movies: dict[int, Movie]) -> set[str]:
-#     """
-#     Returns a set of all genres in the movie database.
-# 
-#     Args:
-#         movies (dict[int, Movie]): Movie dictionary where key is movie_id and
-#             value is Movie object.
-# 
-#     Returns:
-#         set[str]: Set of all genres in the movie database.
-#     """
-# 
-#     genres: set[str] = set()
-#     for movie in movies.values():
-#         genres.update(movie.genres)
-#     return genres
-
-
 def genre_statistics(
     movies: dict[int, Movie],
     movie_recs: list[int],
@@ -163,9 +145,6 @@ def genre_statistics(
     
     mean_scores = {genre: scores[genre] / len(samples[genre]) for genre in scores}
     return mean_scores, samples
-
-
-
 
 
 def group_granularity_case(
@@ -262,88 +241,6 @@ def group_granularity_case(
 
 
     return explanations
-
-    """
-    # NOTE only movies with avg_rating >= 3 are valid recommendations
-    # for the explanations for the why-not questions.
-    # other movies are considered to not be recommendations at all
-    for index, id in enumerate(movie_recs):
-        if movies[id].avg_rating < 3:
-            ignore_rest = index
-            break
-    movie_recs = movie_recs[:ignore_rest]
-
-    # sort movies by the genre
-    movies_by_genre = {}
-    for movie_id in movie_recs:
-        for gen in movies[movie_id].genres:
-            if gen in movies_by_genre.keys():
-                movies_by_genre[gen].append(movie_id)
-            else:
-                movies_by_genre[gen] = [movie_id]
-
-    # start compiling answers
-    answers = []
-
-    if not genre in movies_by_genre.keys():
-        return [f"There are no {genre} movies in the database."]
-
-    # movies of this genre are recommended, but not in top-N
-    if len(movies_by_genre[genre]) > N:
-        answers.append(f"You asked for only {N} items.")
-
-    # TODO tie-breaking method
-
-    # calculate average score for each genre
-    genre_averages = {}
-    for gen, movie_id_list in movies_by_genre.items():
-        genre_averages[gen] = sum(movies[id].avg_rating for id in movie_id_list) / len(
-            movie_id_list
-        )
-
-    worst_genre = min(genre_averages, key=genre_averages.get)
-    if worst_genre == genre:
-        answers.append(f"The group dislikes {genre} movies.")
-
-    best_genre = max(genre_averages, key=genre_averages.get)
-    if best_genre != genre:
-        answers.append(f"The group prefers {best_genre} movies.")
-        answers.append(
-            f"{best_genre} movies scored the highest on average "
-            f"({genre_averages[best_genre]:.2f}), while {genre} movies "
-            f"scored {genre_averages[genre]:.2f}."
-        )
-
-    # goes down to individual movies
-    top10_movies = movie_recs[:N]
-
-    # top10_not_in_genre = set(top10_movies) - (movies_by_genre[genre])
-
-    genre_not_in_top10 = set(movies_by_genre[genre]) - set(top10_movies)
-    # TODO compile these results ??
-    for id in genre_not_in_top10:
-        atomic_granularity_case(movies, top10_movies, id)
-
-    answers.append(
-        f"{len(genre_not_in_top10)} {genre} movies were rated lower by "
-        f"similar users compared to the recommended top-{N} movies."
-    )
-    """
-
-    """ Irrelevant?
-    # find genres of top-10 movies
-    top10_movies = movie_recs[:N]
-    top10_genres = Counter()
-    for movie_id in top10_movies:
-        top10_genres.update(set(movies[movie_id].genres))
-
-    # compile answers to "why not more {genre} movies?"
-    answers.append(f"Only {top10_genres[genre]}/{top10_genres.total()} of the Top-{N} movies are {genre} movies.")
-    answers.append(f"The group prefers {top10_genres.most_common(1)[0][0]} movies.")
-    
-
-    return answers
-    """
 
 
 def position_absenteeism(
