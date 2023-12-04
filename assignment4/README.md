@@ -2,6 +2,7 @@
 
 ## Implementation Details and Assumptions
 
+- For the group recommendation algorithm, we use the average method from assignment 2.
 - Missing prediction scores are replaced by a value of 0 in our implementation.
 - All assumptions made in the implementation details for previous assigments apply, since their code is reused. This includes the following:
   - The prediction function can give a rating over 5. This is not a mistake, but a property of the prediction formula adding and subtracting the biases (movie mean ratings) of the users.
