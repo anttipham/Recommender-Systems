@@ -557,7 +557,6 @@ def find_movie_id(movies: dict[int, Movie], movie_title: str) -> int:
 def main():
     # Fetch all movie objects with related info, as well as top-10 movie_ids
     movies, movie_recs = read_data()
-    print(len(movies), len(movie_recs))
 
     print(f"\n## Top-{N} Average Recommendations for Group {GROUP} ##\n")
     pretty_print_recs(movies, movie_recs)
