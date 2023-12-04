@@ -228,3 +228,5 @@ Why not rank Fargo (1996) first?
 ```
 
 ## Prepare also a short presentation (about 5 slides) to show how your method works (Score: 10%)
+
+This presentation can be found in our repository `assignment4/asg4_presentation.pdf`.
