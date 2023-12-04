@@ -219,29 +219,39 @@ def group_granularity_case(
                 )
                 break
 
-        # find if there is a tie
-        if genre in topk_genre_samples:
-            num_of_ties = 0
-            for best_movie in topk_genre_samples[topk_best_genre]:
-                best_score = movies[best_movie].avg_rating
+        # check for tie: does it effect the most common genre
+        topk_last_rating = movies[movie_recs[N - 1]].avg_rating
+        
+        # find the indices of the tied movies (both before and after last)
+        start_i = None
+        for i in range(0, ANALYSIS_LIMIT):
+            if math.isclose(movies[movie_recs[i]].avg_rating, topk_last_rating):
+                if not start_i:
+                    start_i = i
+                end_i = i
+        
+        # movies in the genre that have tied with the last movie in the top-k
+        all_tied = set(movie_recs[start_i:end_i])
+        genre_movies = set(analysis_genre_samples[genre])
+        genre_tied = genre_movies.intersection(all_tied)
+        not_genre_tied = all_tied.difference(genre_movies)
 
-                for movie in analysis_genre_samples[genre]:
-                    is_tie = math.isclose(best_score, movies[movie].avg_rating)
-                    if is_tie:
-                        num_of_ties += 1
+        # replace the tied movies, starting with asked about genre
+        for j in range(start_i, end_i):
+            movie_recs[j] = genre_tied.pop() if genre_tied else not_genre_tied.pop()
 
-            if len(topk_genre_samples[topk_best_genre]) == len(topk_genre_samples[genre]) - num_of_ties:
-                explanations.append(
+        # check if the genre is now the most common
+        _, topk_genre_samples = genre_stats(movies, movie_recs, N)
+        replaced_topk_best_genre = max(new_topk_genre_samples, key=lambda k: len(new_topk_genre_samples[k]))
+        if genre == replaced_topk_best_genre:
+            explanations.append(
                     f"The genre {genre} could be the most common in the "
                     f"recommendations, but it is not because the order "
                     f"is not defined for movies with the same score."
-                )
-
+            )
 
     ## User analysis
-    topk_last_movie_rating = movies[movie_recs[N - 1]].avg_rating
-
-    # initialize dict with user_id, where list (num_lower, num_higher) tells if
+    # initialize dict with user_id, where list (num_lower, num_higher) tells if 
     # the given score is lower/higher than the last movie of the top-k recs
     genre_movies_user_info: dict[int, list] = {}
 
@@ -252,7 +262,7 @@ def group_granularity_case(
                 genre_movies_user_info[user_id] = list(0 for _ in range(2))
 
             if rating != 0:
-                if rating < topk_last_movie_rating:
+                if rating < topk_last_rating:
                     genre_movies_user_info[user_id][0] += 1
                 else:
                     genre_movies_user_info[user_id][1] += 1
