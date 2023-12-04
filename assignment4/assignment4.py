@@ -22,8 +22,6 @@ N = 10
 # Analysis limit
 ANALYSIS_LIMIT = 100
 GROUP = [233, 9, 242]
-MOVIE = "Matrix, The (1999)"
-GENRE = "action"
 
 
 def atomic_granularity_case(
@@ -92,7 +90,7 @@ def atomic_granularity_case(
         top_k = math.ceil((movie_index + 1) / 10) * 10
         explanations.append(
             f"The movie rank for {movie.title} is {movie_index+1} in the "
-            "recommendations. You asked for only top 10 movies. You could "
+            "recommendations. You asked for only top-10 movies. You could "
             f"consider asking top-{top_k} to get the movie in the "
             "recommendations."
         )
@@ -151,30 +149,30 @@ def genre_statistics(
     """
 
     scores: dict[str, float] = {}
-    samples: dict[str, int] = {}
+    samples: dict[str, list[int]] = {}
 
     for movie_id in movie_recs[:limit]:
         for genre in movies[movie_id].genres:
             if genre not in scores:
                 scores[genre] = 0.0
             if genre not in samples:
-                samples[genre] = 0
+                samples[genre] = []
 
             scores[genre] += movies[movie_id].avg_rating
-            samples[genre] += 1
+            samples[genre].append(movie_id)
     
-    mean_scores = {genre: scores[genre] / samples[genre] for genre in scores}
+    mean_scores = {genre: scores[genre] / len(samples[genre]) for genre in scores}
     return mean_scores, samples
+
+
+
 
 
 def group_granularity_case(
     movies: dict[int, Movie], movie_recs: list[int], genre: str
 ) -> list[str]:
     """
-    Generates explanations for the genre analysis.
-
-    The genre list contains the genres that the analysis generates explanations
-    for.
+    Generates explanations for the group (genre) analysis.
 
     Args:
         movies (dict[int, Movie]): Movie dictionary where key is movie_id and
@@ -185,7 +183,8 @@ def group_granularity_case(
 
     # Top movies by the genre
     topk_means, topk_genre_samples = genre_statistics(movies, movie_recs, N)
-    all_means, _ = genre_statistics(movies, movie_recs, len(movie_recs))
+    analysis_means, analysis_genre_samples = genre_statistics(movies, movie_recs, ANALYSIS_LIMIT)
+    all_means, all_samples = genre_statistics(movies, movie_recs, len(movie_recs))
 
     ## Error checking
     # - An item does not exist in the database of the system.
@@ -193,19 +192,15 @@ def group_granularity_case(
         return [f"The genre {genre} does not exist in the database."]
     
     # - Item is already in the recommendations.
-    if genre in topk_genre_samples:
-        max_samples = max(topk_genre_samples.values())
-        if topk_genre_samples[genre] == max_samples:
-            return [
-                f"The genre {genre} is already the most common genre "
-                "in the recommendations."
-            ]
+    max_samples = max(topk_genre_samples.values(), key=len)
+    if genre == max_samples:
+        return [f"{genre} is already the most common recommendation genre."]
     
     # - None of group members has rated a comedy.
     if all_means[genre] == 0.0:
         return [f"None of the group members have rated a {genre} movie."]
 
-    ## Generate explanations
+    # Generate explanations
     explanations: list[str] = []
 
 
@@ -566,23 +561,29 @@ def main():
     pretty_print_recs(movies, movie_recs)
 
     print("\n## Why-not Questions Regarding the Recommendations ##\n")
-    movie_id = find_movie_id(movies, MOVIE)
 
     # 1st queston: atomic granularity case
-    print(f"Why wasn't movie {MOVIE} in the recommendation?")
+    movie_title = "Matrix, The (1999)"
+    movie_id = find_movie_id(movies, movie_title)
+
+    print(f"Why wasn't movie {movie_title} in the recommendation?")
     explanations1 = atomic_granularity_case(movies, movie_recs, movie_id)
     for i, explanation in enumerate(explanations1):
         print(f"{i+1}. {explanation}")
     print()
 
     # 2nd question: group granularity case
-    print(f"Why not more {GENRE} movies?")
-    for idx, exp in enumerate(group_granularity_case(movies, movie_recs, GENRE)):
+    genre = "romance"
+    print(f"Why not more {genre} movies?")
+    for idx, exp in enumerate(group_granularity_case(movies, movie_recs, genre)):
         print(f"{idx+1}. {exp}")
     print()
 
     # 3rd question: position absenteeism case
-    print(f"Why not rank {MOVIE} first?")
+    movie_title = "Fargo (1996)"
+    movie_id = find_movie_id(movies, movie_title)
+
+    print(f"Why not rank {movie_title} first?")
     explanations3 = position_absenteeism(movies, movie_recs, movie_id)
     for i, explanation in enumerate(explanations3):
         print(f"{i+1}. {explanation}")
