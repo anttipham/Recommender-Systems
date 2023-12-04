@@ -107,7 +107,7 @@ Answers for group granularity case questions.
 - Error checking
   - No movie of this genre is anywhere in the dataset.
     - "The genre does not exist in the database."
-  - The mean rating for this genre is 0.
+  - The mean predicted score for this genre is 0.
     - "None of the group members have been predicted a score for the genre."
 
 - User genre analysis
@@ -148,7 +148,7 @@ Analysis of a group granularity question is implemented in the `assignment4/assi
   4.2 Find the movies tied for near the end of `k`, and see if rearranging by genre would make it more common.
 
 5. User analysis  
-  5.1 For movies in the genre, find user specific predicted ratings. Compare these to the last movie that made the top-k list.
+  5.1 For movies in the genre, find user specific predicted scores. Compare these to the last movie that made the top-k list.
 
 
 ### 3. Position absenteeism: Why not rank Matrix first?
@@ -215,15 +215,15 @@ Why wasn't movie Matrix, The (1999) in the recommendation?
 Why not more romance movies?
 1. Your group prefers drama movies. This could be the reason why romance movies are not in the recommendations.
 2. It is possible that the genre is simply not suitable for the group. Only 2 of the top-10 recommendations are romance movies. The other genres could be more suitable for the group.
-3. User 233 hasn't given high enough ratings for romance movies. They gave 7 ratings which are smaller than the last movie in the top-10 recommendations received.
-4. User 9 hasn't given high enough ratings for romance movies. They gave 10 ratings which are smaller than the last movie in the top-10 recommendations received.
-5. User 242 hasn't given high enough ratings for romance movies. They gave 6 ratings which are smaller than the last movie in the top-10 recommendations received.
+3. User 233 hasn't been given high enough predicted scores for romance movies. They have been given 7 predicted scores which are smaller than the last movie in the top-10 recommendations received.
+4. User 9 hasn't been given high enough predicted scores for romance movies. They have been given 10 predicted scores which are smaller than the last movie in the top-10 recommendations received.
+5. User 242 hasn't been given high enough predicted scores for romance movies. They have been given 6 predicted scores which are smaller than the last movie in the top-10 recommendations received.
 
 Why not rank Fargo (1996) first?
 1. User 9 has not been given a high enough prediction score for the movie Fargo (1996). They gave a score of 3.96 which is lower than the first movie in the recommendations.
 2. User 242 has not been given a high enough prediction score for the movie Fargo (1996). They gave a score of 4.06 which is lower than the first movie in the recommendations.
 3. User 233 has not been given a high enough prediction score for the movie Fargo (1996). They gave a score of 4.57 which is lower than the first movie in the recommendations.
-4. Your group prefers the following genres: drama, crime, thriller, romance, but the movie Fargo (1996) is of the following genres: comedy, crime, drama, thriller.
+4. Your group prefers the following genres: thriller, crime, drama, romance, but the movie Fargo (1996) is of the following genres: comedy, crime, drama, thriller.
 5. It is possible that the movie Fargo (1996) is simply not suitable enough to be higher on the recommendations for the group. The movie has received a score of 4.20 on average. The other movies could be more suitable for the group.
 ```
 

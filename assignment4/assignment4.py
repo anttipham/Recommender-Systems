@@ -274,9 +274,9 @@ def group_granularity_case(
             explanations.append(f"User {user_id} has not rated a {genre} movie.")
         elif num_higher > num_lower:
             explanations.append(
-                f"User {user_id} has been given {num_higher} high predicted scores for "
-                f"{genre} movies, but they could have given even higher "
-                f"predicted scores to get more {genre} movies in the top-{N} group recommendations."
+                f"User {user_id} has been given {num_higher} high predicted "
+                f"scores for {genre} movies, yet not high enough to increase "
+                f"the group score sufficiently to the top-{N} recommendations."
             )
         else:
             explanations.append(
