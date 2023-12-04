@@ -8,8 +8,9 @@
   - The prediction function can give a rating over 5. This is not a mistake, but a property of the prediction formula adding and subtracting the biases (movie mean ratings) of the users.
   - Pearson correlation is used for calculating the similarity between users in the user-based filtering.
   - Movies that some users have already seen can still be recommended to the group if the aggregation methods deems them to be best matches. This is based on the idea that a group member is open to seeing a movie again if everyone else is satisfied with the recommendation, and they liked it.
-  - Aggregation methods (average) use either real or predicted ratings for movies when aggregating group recommendations. This is due to many gaps in the dataset (users have often only rated a few movies). Now we can still concider their preferences when performing the group aggregation.
-  - All applicable assumptions from previous assingments are assumed, please see their `README.md` files if necessary.
+  - Aggregation method (average) uses either real or predicted ratings for movies when aggregating group recommendations. This is due to many gaps in the dataset (users have often only rated a few movies). Now we can still concider their preferences when performing the group aggregation.
+  - Please see their `README.md` files if necessary.
+
 
 ## Running the script
 - We suggest creating a conda environment from the `assignment4/requirements.txt` file:
@@ -41,6 +42,9 @@
   # Position absenteeism case
   MOVIE_ABSENTEEISM = "Fargo (1996)"
   ```
+
+  - Analysis limit is used in some of the explanation engine logic to limit all recommendations from all movies, yet have more than 10 movies to analyze.
+  - Since we don't perform natural language processing, as it is beyond the scope of the course, the items why-not questions are asked about are given with global variables defined above.
 
 ## Design (Score: 40%) and implement (Score: 40%) methods for producing explanations for group recommendations for the granularity case
 
@@ -118,7 +122,7 @@ Answers for group granularity case questions.
     - "None of the group members have been predicted a score for the genre."
 
 - User genre analysis
-  - This includes going over the top-k movies ana a
+  - This includes going over the recommendations and analysing them with various limits (top-k vs. ANALYSIS_LIMIT)
   - "User has not been given a prediction for a movie of this genre"
   - "User has been given high predicted scores for movies of this genre, but they could have given even higher predicted scores to get more movies of this genre in the top-k group recommendations."
   - "User hasn't been given high enough predicted scores for movies of the given genre. They have been given X predicted scores which are smaller than the last movie in the top-k recommendations received."
